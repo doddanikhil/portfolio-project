@@ -11,6 +11,10 @@ ENV/
 .env
 .env.local
 .env.production
+.env.*
+**/.env
+**/.env.local
+**/.env.*
 
 # Node.js
 node_modules/
@@ -29,6 +33,9 @@ build/
 .idea/
 *.swp
 *.swo
+.ruff_cache/
+.mypy_cache/
+**/__pycache__/
 
 # OS
 .DS_Store
@@ -45,3 +52,7 @@ logs/
 # Media files
 media/
 staticfiles/
+backend/media/
+backend/staticfiles/
+frontend/.next/
+frontend/out/

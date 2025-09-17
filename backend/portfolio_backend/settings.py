@@ -106,12 +106,29 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
-# Add to your CORS section (around line 80):
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
-CSRF_TRUSTED_ORIGINS = [
+# CORS / CSRF
+# In development, allow local frontend. In production, configure via env.
+default_dev_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# When DEBUG is False, do NOT allow all; use explicit origins from env
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+_cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+if _cors_env:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_env.split(",") if o.strip()]
+elif not DEBUG:
+    CORS_ALLOWED_ORIGINS = []
+else:
+    CORS_ALLOWED_ORIGINS = default_dev_origins
+
+_csrf_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_env:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_env.split(",") if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = default_dev_origins
 
 # Resend configuration (no default key; must be provided via environment)
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
@@ -127,6 +144,7 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -135,3 +153,13 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security (production)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
