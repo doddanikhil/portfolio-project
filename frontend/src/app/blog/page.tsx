@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Search, Filter } from 'lucide-react';
+import { Calendar, Clock, Search } from 'lucide-react';
 import Link from 'next/link';
-import { blogApi, apiCall } from '@/lib/api';
+import { api, BlogPost } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
-import type { BlogPost } from '@/lib/types';
+import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Posts' },
@@ -26,7 +26,7 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await apiCall(() => blogApi.getAll());
+        const data = await api.getBlogPosts();
         setPosts(data);
         setFilteredPosts(data);
       } catch (error) {
@@ -58,104 +58,113 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className="container section-padding">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-card rounded-lg border border-border p-6 animate-pulse">
-              <div className="h-4 bg-muted rounded mb-2" />
-              <div className="h-8 bg-muted rounded mb-4" />
-              <div className="h-16 bg-muted rounded mb-4" />
-              <div className="flex justify-between">
-                <div className="h-4 w-20 bg-muted rounded" />
-                <div className="h-4 w-16 bg-muted rounded" />
+      <div className="min-h-screen pt-20">
+        <AnimatedBackground />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="glass-card rounded-lg p-6 animate-pulse">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2" />
+                <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded mb-4" />
+                <div className="h-16 bg-gray-300 dark:bg-gray-700 rounded mb-4" />
+                <div className="flex justify-between">
+                  <div className="h-4 w-20 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <div className="h-4 w-16 bg-gray-300 dark:bg-gray-700 rounded" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container section-padding">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-16"
-      >
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-          Blog & Insights
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Thoughts on AI engineering, production systems, and the future of intelligent applications.
-        </p>
-      </motion.div>
-
-      {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mb-12"
-      >
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search posts..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-          >
-            {CATEGORIES.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </motion.div>
-
-      {/* Blog Posts Grid */}
-      {filteredPosts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {filteredPosts.map((post, index) => (
-            <BlogCard key={post.id} post={post} index={index} />
-          ))}
-        </div>
-      ) : (
+    <div className="min-h-screen pt-20">
+      <AnimatedBackground />
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
         >
-          <p className="text-lg text-muted-foreground mb-4">
-            {posts.length === 0 
-              ? "No blog posts yet. Coming soon!" 
-              : "No posts found matching your criteria."
-            }
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
+            Blog & Insights
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Thoughts on AI engineering, production systems, and the future of intelligent applications.
           </p>
-          {posts.length === 0 && (
-            <Link
-              href="/connect"
-              className="text-primary hover:text-primary/80 font-medium"
-            >
-              Get in touch to suggest topics →
-            </Link>
-          )}
         </motion.div>
-      )}
+
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-12"
+        >
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 glass-card rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 glass-card rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            >
+              {CATEGORIES.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </motion.div>
+
+        {/* Blog Posts Grid */}
+        {filteredPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {filteredPosts.map((post, index) => (
+              <BlogCard key={post.id} post={post} index={index} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+          >
+            <div className="glass-card rounded-2xl p-8 max-w-md mx-auto">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                {posts.length === 0 
+                  ? "No blog posts yet. Coming soon!" 
+                  : "No posts found matching your criteria."
+                }
+              </p>
+              {posts.length === 0 && (
+                <Link
+                  href="/contact"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                >
+                  Get in touch to suggest topics →
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }
@@ -167,7 +176,7 @@ function BlogCard({ post, index }: { post: BlogPost; index: number }) {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group bg-card rounded-lg border border-border overflow-hidden card-hover"
+      className="glass-card-hover rounded-lg overflow-hidden"
     >
       {/* Featured Image */}
       {post.featured_image && (
@@ -183,24 +192,24 @@ function BlogCard({ post, index }: { post: BlogPost; index: number }) {
       {/* Content */}
       <div className="p-6">
         {/* Category Badge */}
-        <div className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-3 capitalize">
+        <div className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full mb-3 capitalize">
           {post.category.replace('-', ' ')}
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="text-xl font-bold mb-3 line-clamp-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           <Link href={`/blog/${post.slug}`}>
             {post.title}
           </Link>
         </h3>
 
         {/* Excerpt */}
-        <p className="text-muted-foreground mb-4 line-clamp-3">
+        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
           {post.excerpt}
         </p>
 
         {/* Meta Information */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
