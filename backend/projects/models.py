@@ -1,4 +1,4 @@
-# backend/projects/models.py (CORRECTED - Remove CareerHighlight)
+# backend/projects/models.py
 from django.db import models
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField

@@ -1,8 +1,8 @@
-
+# backend/projects/views.py
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Project, Technology, TechCategory, CareerHighlight
+from .models import Project, Technology, TechCategory  # REMOVED CareerHighlight
 import resend
 
 # Set Resend API key
@@ -75,7 +75,6 @@ def project_detail(request, slug):
                 'performance_metrics': project.details.performance_metrics,
                 'challenges_solved': project.details.challenges_solved,
                 'demo_video_url': project.details.demo_video_url,
-                'lessons_learned': project.details.lessons_learned,
             }
         
         data = {
@@ -112,55 +111,44 @@ def technologies_list(request):
                 'icon_url': tech.icon_url
             })
         
-        if technologies:  # Only include categories that have technologies
+        if technologies:
             data.append({
                 'category': category.name,
                 'order': category.order,
                 'technologies': technologies
             })
     
-    return Response(sorted(data, key=lambda x: x['order']))
+    return Response(data)
 
 @api_view(['POST'])
 def send_contact_email(request):
     try:
         name = request.data.get('name')
-        email = request.data.get('email') 
+        email = request.data.get('email')
         subject = request.data.get('subject')
         message = request.data.get('message')
         
         if not all([name, email, subject, message]):
-            return Response(
-                {'error': 'All fields are required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'All fields are required'}, status=400)
         
         # Send email using Resend
         params = {
-            "from": "Portfolio Contact <onboarding@resend.dev>",
-            "to": ["doddanikhil@gmail.com"],
+            "from": "Portfolio <hello@your-domain.com>",
+            "to": ["your-email@example.com"],
             "subject": f"Portfolio Contact: {subject}",
             "html": f"""
-            <h2>New contact form submission</h2>
+            <h3>New contact form submission</h3>
             <p><strong>Name:</strong> {name}</p>
             <p><strong>Email:</strong> {email}</p>
             <p><strong>Subject:</strong> {subject}</p>
             <p><strong>Message:</strong></p>
-            <div style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-                {message}
-            </div>
+            <p>{message}</p>
             """,
-            "reply_to": [email]
         }
         
         email_response = resend.Emails.send(params)
-        print(f"Email sent: {email_response}")
         
-        return Response({'success': True, 'message': 'Email sent successfully'})
+        return Response({'message': 'Email sent successfully!'})
         
     except Exception as e:
-        print(f"Email error: {e}")
-        return Response(
-            {'error': f'Failed to send email: {str(e)}'}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({'error': str(e)}, status=500)
