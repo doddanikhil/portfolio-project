@@ -119,8 +119,7 @@ class BlogAPITestCase(TestCase):
 
     def test_blog_posts_list_endpoint(self):
         """Test the blog posts list endpoint"""
-        url = reverse('blog_posts_list')
-        response = self.client.get(url)
+        response = self.client.get('/api/v1/blog/posts/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -128,8 +127,7 @@ class BlogAPITestCase(TestCase):
 
     def test_recent_blog_posts_endpoint(self):
         """Test the recent blog posts endpoint"""
-        url = reverse('recent_blog_posts')
-        response = self.client.get(url)
+        response = self.client.get('/api/v1/blog/recent/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -142,8 +140,7 @@ class CoreAPITestCase(TestCase):
 
     def test_site_config_endpoint(self):
         """Test the core site config endpoint"""
-        url = reverse('site_config')
-        response = self.client.get(url)
+        response = self.client.get('/api/v1/core/config/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
