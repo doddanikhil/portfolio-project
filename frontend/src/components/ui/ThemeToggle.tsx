@@ -27,35 +27,57 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xl animate-pulse border border-white/30" />
+      <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl animate-pulse border border-white/20" />
     );
   }
 
   return (
     <button
       onClick={toggleTheme}
-      className="relative w-10 h-10 rounded-xl bg-white/30 dark:bg-white/10 backdrop-blur-xl border border-white/40 dark:border-white/20 hover:bg-white/40 dark:hover:bg-white/20 hover:scale-110 transition-all duration-300 flex items-center justify-center group overflow-hidden"
+      className="relative w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 hover:scale-110 hover:rotate-6 transition-all duration-500 flex items-center justify-center group overflow-hidden shadow-lg hover:shadow-2xl"
       aria-label="Toggle theme"
     >
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 animate-shimmer opacity-0 group-hover:opacity-100" />
+      {/* Liquid glass effect background */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
-      <div className="relative z-10">
+      {/* Animated shimmer */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+      
+      {/* Glow effect */}
+      <div className={`absolute inset-0 rounded-2xl transition-all duration-500 ${
+        isDark 
+          ? 'shadow-[0_0_20px_rgba(250,204,21,0.3)] group-hover:shadow-[0_0_30px_rgba(250,204,21,0.5)]'
+          : 'shadow-[0_0_20px_rgba(59,130,246,0.3)] group-hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]'
+      }`} />
+      
+      <div className="relative z-10 transition-all duration-500 group-hover:scale-110">
         {isDark ? (
           <Sun 
-            size={18} 
-            className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 drop-shadow-lg" 
+            size={20} 
+            className="text-yellow-400 group-hover:text-yellow-300 transition-all duration-500 drop-shadow-lg group-hover:rotate-180" 
           />
         ) : (
           <Moon 
-            size={18} 
-            className="text-blue-600 group-hover:text-blue-500 transition-colors duration-300 drop-shadow-lg" 
+            size={20} 
+            className="text-blue-600 group-hover:text-blue-500 transition-all duration-500 drop-shadow-lg group-hover:-rotate-12" 
           />
         )}
       </div>
       
-      {/* Glow effect */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+      {/* Floating particles effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className={`absolute w-1 h-1 bg-current rounded-full animate-ping`}
+            style={{
+              top: `${20 + i * 15}%`,
+              left: `${30 + i * 20}%`,
+              animationDelay: `${i * 200}ms`,
+            }}
+          />
+        ))}
+      </div>
     </button>
   );
 }

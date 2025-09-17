@@ -1,231 +1,226 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, Search } from 'lucide-react';
-import Link from 'next/link';
-import { api, BlogPost } from '@/lib/api';
-import { formatDate } from '@/lib/utils';
-import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 
-const CATEGORIES = [
-  { value: 'all', label: 'All Posts' },
-  { value: 'ai-trends', label: 'AI Trends' },
-  { value: 'technical', label: 'Technical' },
-  { value: 'industry', label: 'Industry' },
-  { value: 'tutorial', label: 'Tutorial' },
-  { value: 'opinion', label: 'Opinion' },
-];
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Search, Calendar, Clock, Eye, Tag } from 'lucide-react';
+import { getBlogPosts, getBlogCategories, handleAPIError, type BlogPost, type BlogCategory } from '@/lib/api';
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await api.getBlogPosts();
-        setPosts(data);
-        setFilteredPosts(data);
-      } catch (error) {
-        console.error('Failed to load blog posts:', error);
+        const [postsData, categoriesData] = await Promise.all([
+          getBlogPosts({ search: searchTerm, category: selectedCategory }),
+          getBlogCategories(),
+        ]);
+
+        setPosts(postsData);
+        setCategories(categoriesData);
+      } catch (err) {
+        console.error('Blog page error:', err);
+        setError(handleAPIError(err));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPosts();
-  }, []);
-
-  useEffect(() => {
-    let filtered = posts;
-
-    if (searchTerm) {
-      filtered = filtered.filter((post) =>
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter((post) => post.category === selectedCategory);
-    }
-
-    setFilteredPosts(filtered);
-  }, [posts, searchTerm, selectedCategory]);
+    fetchData();
+  }, [searchTerm, selectedCategory]);
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-20">
-        <AnimatedBackground />
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="glass-card rounded-lg p-6 animate-pulse">
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2" />
-                <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded mb-4" />
-                <div className="h-16 bg-gray-300 dark:bg-gray-700 rounded mb-4" />
-                <div className="flex justify-between">
-                  <div className="h-4 w-20 bg-gray-300 dark:bg-gray-700 rounded" />
-                  <div className="h-4 w-16 bg-gray-300 dark:bg-gray-700 rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/80">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Unable to Load Blog</h1>
+          <p className="text-white/70 mb-6">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-20">
-      <AnimatedBackground />
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-4 py-20">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
-            Blog & Insights
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Thoughts on AI engineering, production systems, and the future of intelligent applications.
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-white mb-4">Latest Insights</h1>
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            Thoughts on AI, technology, and software engineering
           </p>
-        </motion.div>
+        </div>
 
         {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-        >
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-12 border border-white/20">
+          <div className="grid md:grid-cols-2 gap-4">
             {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search posts..."
+                placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 glass-card rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-blue-400 transition-colors"
               />
             </div>
 
             {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 glass-card rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            >
-              {CATEGORIES.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-400 appearance-none"
+              >
+                <option value="" className="bg-slate-800">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category.key} value={category.key} className="bg-slate-800">
+                    {category.name} ({category.count})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </motion.div>
 
-        {/* Blog Posts Grid */}
-        {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {filteredPosts.map((post, index) => (
-              <BlogCard key={post.id} post={post} index={index} />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <div className="glass-card rounded-2xl p-8 max-w-md mx-auto">
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
-                {posts.length === 0 
-                  ? "No blog posts yet. Coming soon!" 
-                  : "No posts found matching your criteria."
-                }
-              </p>
-              {posts.length === 0 && (
-                <Link
-                  href="/contact"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
-                >
-                  Get in touch to suggest topics →
-                </Link>
+          {/* Active Filters */}
+          {(searchTerm || selectedCategory) && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {searchTerm && (
+                <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                  Search: {searchTerm}
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="ml-2 hover:text-red-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {selectedCategory && (
+                <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+                  Category: {categories.find(c => c.key === selectedCategory)?.name}
+                  <button 
+                    onClick={() => setSelectedCategory('')}
+                    className="ml-2 hover:text-red-300"
+                  >
+                    ×
+                  </button>
+                </span>
               )}
             </div>
-          </motion.div>
+          )}
+        </div>
+
+        {/* Blog Posts */}
+        {posts.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">📝</div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Posts Found</h3>
+            <p className="text-white/70">
+              {searchTerm || selectedCategory 
+                ? 'Try adjusting your search criteria' 
+                : 'Blog posts coming soon! Check back later.'
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {posts.map((post) => (
+              <Link 
+                key={post.slug} 
+                href={`/blog/${post.slug}`}
+                className="group block"
+              >
+                <article className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all hover:transform hover:scale-105 hover:shadow-2xl">
+                  {/* Featured Badge */}
+                  {post.is_featured && (
+                    <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black text-xs font-bold rounded-full">
+                      Featured
+                    </div>
+                  )}
+
+                  {/* Featured Image */}
+                  {post.featured_image && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={post.featured_image} 
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </div>
+                  )}
+
+                  <div className="p-6">
+                    {/* Category */}
+                    <div className="inline-block px-3 py-1 bg-blue-600/20 text-blue-400 text-sm rounded-full mb-3">
+                      {categories.find(c => c.key === post.category)?.name || post.category}
+                    </div>
+
+                    {/* Title */}
+                    <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors mb-3 line-clamp-2">
+                      {post.title}
+                    </h2>
+
+                    {/* Excerpt */}
+                    <p className="text-white/70 mb-4 line-clamp-3">{post.excerpt}</p>
+
+                    {/* Meta Info */}
+                    <div className="flex items-center justify-between text-sm text-white/50">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{post.reading_time} min read</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{post.views} views</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(post.published_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
         )}
+
+        {/* Results Count */}
+        <div className="text-center mt-12">
+          <p className="text-white/60">
+            Showing {posts.length} article{posts.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
     </div>
-  );
-}
-
-// Blog Card Component
-function BlogCard({ post, index }: { post: BlogPost; index: number }) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="glass-card-hover rounded-lg overflow-hidden"
-    >
-      {/* Featured Image */}
-      {post.featured_image && (
-        <div className="relative h-48 overflow-hidden">
-          <img
-            src={post.featured_image}
-            alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="p-6">
-        {/* Category Badge */}
-        <div className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full mb-3 capitalize">
-          {post.category.replace('-', ' ')}
-        </div>
-
-        {/* Title */}
-        <h3 className="text-xl font-bold mb-3 line-clamp-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-          <Link href={`/blog/${post.slug}`}>
-            {post.title}
-          </Link>
-        </h3>
-
-        {/* Excerpt */}
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-          {post.excerpt}
-        </p>
-
-        {/* Meta Information */}
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              {formatDate(post.published_date)}
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {post.reading_time} min read
-            </div>
-          </div>
-          
-          <div className="text-xs">
-            {post.views} views
-          </div>
-        </div>
-      </div>
-    </motion.article>
   );
 }
