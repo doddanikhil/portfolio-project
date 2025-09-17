@@ -5,10 +5,10 @@ from django.db.models import Q, Sum
 from .models import Project, Technology, TechCategory, CareerHighlight, SiteConfiguration
 from portfolio_backend.blog.models import BlogPost, ContactSubmission
 import resend
-import os
+from django.conf import settings
 
-# Set Resend API key
-resend.api_key = os.getenv("RESEND_API_KEY", "re_cLyUBKP3_BgQevi4fU8ZtLikDp8agzQN2")
+# Configure Resend API key from settings/environment (no hardcoded default)
+resend.api_key = getattr(settings, "RESEND_API_KEY", None) or ""
 
 @api_view(['GET'])
 def api_test(request):

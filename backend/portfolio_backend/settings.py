@@ -113,8 +113,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# Add Resend configuration at the end:
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "re_cLyUBKP3_BgQevi4fU8ZtLikDp8agzQN2")
+# Resend configuration (no default key; must be provided via environment)
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 # Cloudinary
 CLOUDINARY_STORAGE = {

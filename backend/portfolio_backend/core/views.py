@@ -8,9 +8,10 @@ from .models import CareerHighlight, SiteConfiguration, ContactSubmission
 import resend
 import json
 import os
+from django.conf import settings
 
-# Set Resend API key
-resend.api_key = "re_cLyUBKP3_BgQevi4fU8ZtLikDp8agzQN2"
+# Configure Resend API key from environment/settings (no hardcoded default)
+resend.api_key = getattr(settings, "RESEND_API_KEY", None) or os.getenv("RESEND_API_KEY", "")
 
 @api_view(['GET'])
 def career_highlights(request):
@@ -42,7 +43,7 @@ def site_config(request):
                 'tagline': 'Applied AI Engineer',
                 'bio': 'Applied AI Engineer specializing in production LLM systems and scalable cloud infrastructure.',
                 'email': 'hello@nikhildodda.dev',
-                'github_url': 'https://github.com/your-username',
+                'github_url': 'https://github.com/doddanikhil',
                 'bluesky_handle': '@devdn.bsky.social',
                 'cal_com_username': 'dnpro',
                 'linkedin_url': '',  # Empty since you don't want LinkedIn
