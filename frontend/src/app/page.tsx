@@ -1,228 +1,420 @@
 'use client';
-
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { api, Project } from '@/lib/api';
-import { ArrowRight, Github, ExternalLink, Calendar, Users } from 'lucide-react';
-import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+import { motion } from 'framer-motion';
+import { ArrowRight, Download, Calendar, Github, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { projectsApi, blogApi, coreApi, apiCall } from '@/lib/api';
+import { formatDate } from '@/lib/utils';
+import type { Project, BlogPost, SiteConfig, PortfolioStats } from '@/lib/types';
 
 export default function HomePage() {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
+  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
+  const [stats, setStats] = useState<PortfolioStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFeaturedProjects = async () => {
+    const fetchData = async () => {
       try {
-        const projects = await api.getProjects();
-        setFeaturedProjects(projects.filter(p => p.is_featured).slice(0, 3));
-      } catch (err) {
-        console.error('Failed to load featured projects:', err);
+        const [projectsData, blogData, configData, statsData] = await Promise.all([
+          apiCall(() => projectsApi.getFeatured()),
+          apiCall(() => blogApi.getRecent()),
+          apiCall(() => coreApi.getConfig()),
+          apiCall(() => coreApi.getStats()),
+        ]);
+
+        setFeaturedProjects(projectsData.slice(0, 3));
+        setRecentPosts(blogData.slice(0, 3));
+        setSiteConfig(configData);
+        setStats(statsData);
+      } catch (error) {
+        console.error('Failed to load homepage data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFeaturedProjects();
+    fetchData();
   }, []);
 
   return (
-    <main className="min-h-screen">
-      <AnimatedBackground />
-      
+    <>
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center pt-20">
-        <div className="container mx-auto px-4 py-20">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="glass-card rounded-3xl p-8 md:p-12 animate-float">
-              <p className="text-lg sm:text-xl text-blue-600 dark:text-blue-400 font-medium mb-4">
-                👋 Hello, I'm
-              </p>
-
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6">
-                Nikhil Dodda
-              </h1>
-
-              <h2 className="text-xl sm:text-2xl md:text-3xl text-gray-700 dark:text-gray-300 font-semibold mb-8">
-                Applied AI Engineer
-              </h2>
-              
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-12 leading-relaxed max-w-3xl mx-auto">
-                I build <span className="text-blue-600 dark:text-blue-400 font-semibold">production AI systems</span> that 
-                scale to millions of users. From RAG pipelines to cloud infrastructure, 
-                I turn complex AI concepts into real business value.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <Link
-                  href="/projects"
-                  className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl hover:scale-105"
-                >
-                  <span>View My Work</span>
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                
-                <Link
-                  href="/contact"
-                  className="glass-button px-8 py-4 text-gray-700 dark:text-gray-300 font-medium rounded-xl shadow-lg hover:scale-105"
-                >
-                  Get In Touch
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-md mx-auto">
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">15+</div>
-                  <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Projects</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400">99.9%</div>
-                  <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Uptime</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">40%</div>
-                  <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Faster</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Projects Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Featured Projects
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              AI systems and applications that solve real-world problems
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="glass-card rounded-2xl p-8 max-w-sm mx-auto">
-                <div className="animate-pulse text-gray-600 dark:text-gray-400">Loading projects...</div>
-              </div>
-            </div>
-          ) : featuredProjects.length > 0 ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-              {featuredProjects.map((project, index) => (
-                <div
-                  key={project.slug}
-                  className="glass-card-hover rounded-2xl p-6"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  {/* Project image placeholder */}
-                  <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl mb-4 flex items-center justify-center">
-                    <span className="text-4xl">🚀</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {project.title}
-                    </h3>
-                    <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full">
-                      Featured
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                    {project.tagline}
-                  </p>
-
-                  {/* Technologies */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.technologies.slice(0, 3).map((tech) => (
-                      <span
-                        key={tech.name}
-                        className="px-2 py-1 bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 rounded-md text-xs"
-                      >
-                        {tech.name}
-                      </span>
-                    ))}
-                    {project.technologies.length > 3 && (
-                      <span className="px-2 py-1 text-gray-500 dark:text-gray-400 text-xs">
-                        +{project.technologies.length - 3} more
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Project meta */}
-                  <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} />
-                      <span>{new Date(project.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users size={12} />
-                      <span>Solo Project</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    {project.github_url && (
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 glass-button rounded-lg text-sm hover:scale-105 transition-transform"
-                      >
-                        <Github size={16} />
-                        <span>Code</span>
-                      </a>
-                    )}
-                    
-                    {project.live_demo_url && (
-                      <a
-                        href={project.live_demo_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
-                      >
-                        <ExternalLink size={16} />
-                        <span>Demo</span>
-                      </a>
-                    )}
-                    
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="flex items-center gap-2 px-3 py-2 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors text-sm ml-auto"
-                    >
-                      <span>Details</span>
-                      <ArrowRight size={16} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="glass-card rounded-2xl p-8 max-w-md mx-auto">
-                <p className="text-gray-600 dark:text-gray-400 mb-4">No featured projects yet.</p>
-                <Link 
-                  href="http://127.0.0.1:8000/admin" 
-                  target="_blank"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  Add featured projects in Django Admin
-                </Link>
-              </div>
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 px-8 py-4 glass-button rounded-xl shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <span>View All Projects</span>
-              <ArrowRight size={20} />
-            </Link>
-          </div>
-        </div>
-      </section>
-    </main>
+      <HeroSection config={siteConfig} stats={stats} />
+      
+      {/* Featured Projects */}
+      <ProjectsSection projects={featuredProjects} loading={loading} />
+      
+      {/* Recent Blog Posts */}
+      <BlogSection posts={recentPosts} loading={loading} />
+      
+      {/* Contact CTA */}
+      <ContactSection config={siteConfig} />
+    </>
   );
 }
+
+// Hero Section Component
+function HeroSection({ 
+  config, 
+  stats 
+}: { 
+  config: SiteConfig | null; 
+  stats: PortfolioStats | null; 
+}) {
+  const taglines = [
+    "Building Production LLM Systems",
+    "Scaling AI Infrastructure", 
+    "Creating Intelligent Applications",
+    "Applied AI Engineer"
+  ];
+
+  return (
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+      
+      <div className="container text-center relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Greeting */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-primary font-medium mb-4"
+          >
+            👋 Hello, I'm
+          </motion.p>
+
+          {/* Name */}
+          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold mb-6">
+            {config?.site_name || 'Nikhil Dodda'}
+          </h1>
+
+          {/* Tagline with Typewriter Effect */}
+          <div className="h-16 flex items-center justify-center mb-8">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl text-muted-foreground font-medium">
+              {config?.tagline || 'Applied AI Engineer'}
+            </h2>
+          </div>
+
+          {/* Stats Grid */}
+          {stats && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-2xl mx-auto"
+            >
+              <StatCard number={stats.total_projects} label="Projects" />
+              <StatCard number={stats.technologies_mastered} label="Technologies" />
+              <StatCard number={`${stats.uptime_percentage}%`} label="Uptime" />
+              <StatCard number={`${stats.performance_improvement}%`} label="Faster" />
+            </motion.div>
+          )}
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
+            <Link href="/projects" className="btn-primary flex items-center gap-2">
+              <span>View My Work</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            
+            <Link href="/connect" className="btn-secondary flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span>Let's Connect</span>
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Stats Card Component
+function StatCard({ number, label }: { number: string | number; label: string }) {
+  return (
+    <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
+      <div className="text-2xl sm:text-3xl font-bold text-primary">
+        {number}
+      </div>
+      <div className="text-sm text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+// Projects Section Component
+function ProjectsSection({ projects, loading }: { projects: Project[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <section className="section-padding bg-muted/30">
+        <div className="container">
+          <div className="h-12 bg-muted rounded mx-auto mb-6 max-w-md animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-card rounded-lg border border-border p-6 animate-pulse">
+                <div className="h-48 bg-muted rounded mb-4" />
+                <div className="h-6 bg-muted rounded mb-2" />
+                <div className="h-4 bg-muted rounded mb-4" />
+                <div className="flex gap-2 mb-4">
+                  <div className="h-6 w-16 bg-muted rounded" />
+                  <div className="h-6 w-16 bg-muted rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="section-padding bg-muted/30">
+      <div className="container">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            Featured Projects
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Real-world AI applications built with production-ready architecture,
+            focusing on measurable impact and scalable solutions.
+          </p>
+        </motion.div>
+
+        {projects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            {projects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} index={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              No featured projects yet.
+            </p>
+            <Link
+              href="/projects"
+              className="text-primary hover:text-primary/80 font-medium"
+            >
+              View all projects →
+            </Link>
+          </div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <Link href="/projects" className="btn-primary">
+            View All Projects
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Project Card Component
+function ProjectCard({ project, index }: { project: Project; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="group bg-card rounded-lg border border-border overflow-hidden card-hover"
+    >
+      {project.is_featured && (
+        <div className="absolute top-4 left-4 z-10 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full">
+          Featured
+        </div>
+      )}
+
+      <div className="relative h-48 overflow-hidden">
+        {project.thumbnail ? (
+          <img
+            src={project.thumbnail}
+            alt={project.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+            <div className="text-2xl font-bold text-muted-foreground">
+              {project.title.split(' ').map(word => word[0]).join('')}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="p-6">
+        <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+          {project.title}
+        </h3>
+
+        <p className="text-muted-foreground mb-4 line-clamp-2">
+          {project.tagline}
+        </p>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.technologies.slice(0, 3).map((tech) => (
+            <span
+              key={tech.id}
+              className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full"
+            >
+              {tech.name}
+            </span>
+          ))}
+          {project.technologies.length > 3 && (
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+              +{project.technologies.length - 3} more
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/projects/${project.slug}`}
+            className="text-primary hover:text-primary/80 font-medium text-sm transition-colors"
+          >
+            Learn More →
+          </Link>
+          
+          <div className="flex gap-2">
+            {project.github_url && (
+              <a
+                href={project.github_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+            )}
+            {project.live_demo_url && (
+              <a
+                href={project.live_demo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// Blog Section Component
+function BlogSection({ posts, loading }: { posts: BlogPost[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <section className="section-padding">
+        <div className="container">
+          <div className="h-12 bg-muted rounded mx-auto mb-6 max-w-md animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-card rounded-lg border border-border p-6 animate-pulse">
+                <div className="h-4 w-20 bg-muted rounded mb-3" />
+                <div className="h-6 bg-muted rounded mb-3" />
+                <div className="h-16 bg-muted rounded mb-4" />
+                <div className="flex justify-between">
+                  <div className="h-4 w-32 bg-muted rounded" />
+                  <div className="h-4 w-16 bg-muted rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="section-padding">
+      <div className="container">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            Latest Insights
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Thoughts on AI engineering, production systems, and the future of intelligent applications.
+          </p>
+        </motion.div>
+
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            {posts.map((post, index) => (
+              <motion.article
+                key={post.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="group bg-card rounded-lg border border-border overflow-hidden card-hover"
+              >
+                {post.featured_image && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  </div>
+                )}
+
+                <div className="p-6">
+                  <div className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-3 capitalize">
+                    {post.category.replace('-', ' ')}
+                  </div>
+
+                  <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                    <Link href={`/blog/${post.slug}`}>
+                      {post.title}
+                    </Link>
+                  </h3>
+
+                  <p className="text-muted-foreground mb-4 line-clamp-3">
+                    {post.excerpt}
+                  </p>
+
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(post.published_date)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {post.reading_time} min read
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs">
+                      {post.# Blog Pages & Homepage
