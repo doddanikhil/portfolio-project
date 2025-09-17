@@ -85,7 +85,7 @@ export function Footer() {
 }
 
 // Social Link Component
-function SocialLink({ href, icon: Icon, label }: { href: string; icon: any; label: string }) {
+function SocialLink({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string }) {
   return (
     <a
     href={href}

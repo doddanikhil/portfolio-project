@@ -158,7 +158,7 @@ class APIClient {
   }
 
   // Test connection
-  async testConnection(): Promise<any> {
+  async testConnection(): Promise<{ message: string; version: string; status: string; endpoints: string[] }> {
     return this.request('/test/');
   }
 
@@ -217,7 +217,7 @@ class APIClient {
   }
 
   // Contact
-  async submitContact(data: ContactFormData): Promise<APIResponse<any>> {
+  async submitContact(data: ContactFormData): Promise<APIResponse<{ message: string; id?: number }>> {
     return this.request('/contact/', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -244,7 +244,7 @@ export const submitContact = (data: ContactFormData) => api.submitContact(data);
 export const testConnection = () => api.testConnection();
 
 // Error handling utility
-export const handleAPIError = (error: any): string => {
+export const handleAPIError = (error: unknown): string => {
   if (error.message?.includes('Failed to fetch')) {
     return 'Unable to connect to the server. Please check if the backend is running.';
   }

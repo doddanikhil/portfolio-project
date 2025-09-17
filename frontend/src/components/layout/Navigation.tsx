@@ -16,7 +16,7 @@ const navigation = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { theme, setTheme } = useTheme();
+  // const { theme, setTheme } = useTheme(); // Commented out as not used yet
   const pathname = usePathname();
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export function Navigation() {
             <div className="hidden lg:flex items-center space-x-4">
               <ThemeToggle />
               <Link href="/connect" className="btn-primary">
-                Let's Talk
+                Let&apos;s Talk
               </Link>
             </div>
 
@@ -125,7 +125,7 @@ export function Navigation() {
                   
                   <div className="pt-4 border-t border-border">
                     <Link href="/connect" className="btn-primary w-full text-center">
-                      Let's Talk
+                      Let&apos;s Talk
                     </Link>
                   </div>
                 </nav>

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import Navigation from '@/components/Navigation';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// Use system fonts for better reliability
+const fontClassName = 'font-sans';
 
 export const metadata: Metadata = {
   title: 'Nikhil Dodda - Applied AI Engineer',
@@ -47,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} bg-slate-900 min-h-screen`}>
+      <body className={`${fontClassName} bg-slate-900 min-h-screen`}>
         <Navigation />
         <main className="pt-16">
           {children}

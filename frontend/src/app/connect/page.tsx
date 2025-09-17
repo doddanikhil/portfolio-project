@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Mail, MapPin, Calendar, Send, CheckCircle, AlertCircle, Github, Linkedin, FileText } from 'lucide-react';
+import { Mail, Calendar, Send, CheckCircle, AlertCircle, Github, Linkedin, FileText } from 'lucide-react';
 import { submitContact, getSiteMetadata, handleAPIError, type ContactFormData, type SiteMetadata } from '@/lib/api';
 
 export default function ConnectPage() {
@@ -103,9 +103,9 @@ export default function ConnectPage() {
       <div className="container mx-auto px-4 py-20">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">Let's Connect</h1>
+          <h1 className="text-5xl font-bold text-white mb-4">Let&apos;s Connect</h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Have a project in mind or want to discuss opportunities? I'd love to hear from you.
+            Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you.
           </p>
         </div>
 

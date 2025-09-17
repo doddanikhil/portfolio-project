@@ -106,7 +106,7 @@ export default function ProjectsPage() {
             My Projects
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            A collection of AI systems and applications I've built to solve
+            A collection of AI systems and applications I&apos;ve built to solve
             real-world problems
           </p>
         </div>

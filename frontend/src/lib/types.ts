@@ -35,7 +35,7 @@ export interface Technology {
     technology_justification: string;
     technical_architecture?: string;
     key_features: string[];
-    performance_metrics: Record<string, any>;
+    performance_metrics: Record<string, string | number>;
     challenges_solved: string;
     demo_video_url?: string;
   }

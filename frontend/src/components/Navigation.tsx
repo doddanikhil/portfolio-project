@@ -105,7 +105,7 @@ export default function Navigation() {
                 target="_blank"
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg text-sm font-medium transition-all"
               >
-                Let's Connect
+                Let&apos;s Connect
               </Link>
             )}
           </div>
@@ -178,7 +178,7 @@ export default function Navigation() {
                     className="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-all"
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
-                    Let's Connect
+                    Let&apos;s Connect
                   </Link>
                 </div>
               )}

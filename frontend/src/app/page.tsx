@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Github, ExternalLink, Calendar, MapPin, Mail, Coffee } from 'lucide-react';
 import { 
   getFeaturedProjects, 
@@ -93,16 +94,18 @@ export default function HomePage() {
           {/* Profile Image */}
           {siteConfig?.profile_image && (
             <div className="mb-8">
-              <img 
+              <Image 
                 src={siteConfig.profile_image} 
                 alt={siteConfig.name}
+                width={128}
+                height={128}
                 className="w-32 h-32 rounded-full mx-auto border-4 border-white/20 shadow-2xl"
               />
             </div>
           )}
           
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Hi, I'm{' '}
+            Hi, I&apos;m{' '}
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               {siteConfig?.name || 'Nikhil Dodda'}
             </span>
@@ -158,7 +161,7 @@ export default function HomePage() {
                 className="group px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold transition-all backdrop-blur-sm border border-white/20 hover:border-white/40"
               >
                 <Calendar className="w-5 h-5 mr-2 inline-block" />
-                Let's Connect
+                Let&apos;s Connect
               </Link>
             )}
           </div>

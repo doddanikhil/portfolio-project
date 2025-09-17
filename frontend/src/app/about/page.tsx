@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Mail, MapPin, Calendar, Download, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, MapPin, Calendar, Download } from 'lucide-react';
 import { getTechStack, getCareerHighlights, getSiteMetadata, handleAPIError, type TechCategory, type CareerHighlight, type SiteMetadata } from '@/lib/api';
 
 export default function AboutPage() {
@@ -82,9 +83,11 @@ export default function AboutPage() {
             <div className="lg:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
               <div className="flex flex-col md:flex-row gap-6 mb-6">
                 {siteConfig?.profile_image && (
-                  <img 
+                  <Image 
                     src={siteConfig.profile_image} 
                     alt={siteConfig.name}
+                    width={128}
+                    height={128}
                     className="w-32 h-32 rounded-2xl object-cover border-4 border-white/20"
                   />
                 )}
@@ -287,7 +290,7 @@ export default function AboutPage() {
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Let's Work Together</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Let&apos;s Work Together</h3>
             <p className="text-white/70 mb-6 max-w-2xl mx-auto">
               Interested in collaborating or have a project in mind? I&apos;m always open to discussing new opportunities and challenges.
             </p>

@@ -40,7 +40,7 @@ export default function ContactPage() {
       await api.submitContact(data);
       setIsSubmitted(true);
       reset();
-    } catch (err) {
+    } catch {
       setError('Failed to send message. Please try again or contact me directly.');
     } finally {
       setIsSubmitting(false);
@@ -59,7 +59,7 @@ export default function ContactPage() {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
           <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Message Sent!</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Thank you for reaching out. I'll get back to you within 24 hours.
+            Thank you for reaching out. I&apos;ll get back to you within 24 hours.
           </p>
           <button
             onClick={() => setIsSubmitted(false)}
@@ -85,10 +85,10 @@ export default function ContactPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
-              Let's Connect
+              Let&apos;s Connect
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              I'm always excited to discuss AI projects, collaboration opportunities, 
+              I&apos;m always excited to discuss AI projects, collaboration opportunities, 
               or just chat about the latest in machine learning and software engineering.
             </p>
           </div>
@@ -285,7 +285,7 @@ function ContactMethod({
   action,
   href,
 }: {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   action: string;
