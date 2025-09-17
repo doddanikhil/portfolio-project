@@ -83,7 +83,7 @@ export default function ConnectPage() {
               <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-white mb-2">Message Sent!</h1>
               <p className="text-white/70 mb-6">
-                Thank you for reaching out. I'll get back to you within 24 hours.
+                Thank you for reaching out. I&apos;ll get back to you within 24 hours.
               </p>
               <button
                 onClick={() => setIsSubmitted(false)}

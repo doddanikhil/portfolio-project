@@ -289,7 +289,7 @@ export default function AboutPage() {
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Let's Work Together</h3>
             <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-              Interested in collaborating or have a project in mind? I'm always open to discussing new opportunities and challenges.
+              Interested in collaborating or have a project in mind? I&apos;m always open to discussing new opportunities and challenges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
