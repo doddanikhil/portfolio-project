@@ -1,4 +1,4 @@
-# portfolio_backend/projects/models.py
+# backend/projects/models.py (CORRECTED - Remove CareerHighlight)
 from django.db import models
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField
@@ -70,65 +70,9 @@ class ProjectDetail(models.Model):
     technology_justification = models.TextField(help_text="Why these technologies? Markdown supported")
     technical_architecture = CloudinaryField('image', folder='portfolio/architecture/', blank=True)
     key_features = models.JSONField(default=list, help_text="List of key features")
-    performance_metrics = models.JSONField(default=list, help_text="Quantifiable results")
+    performance_metrics = models.JSONField(default=dict, help_text="Quantifiable results as key-value pairs")
     challenges_solved = models.TextField(blank=True, help_text="Markdown supported")
     demo_video_url = models.URLField(blank=True)
-    lessons_learned = models.TextField(blank=True, help_text="What you learned. Markdown supported")
     
     def __str__(self):
         return f"Details for {self.project.title}"
-
-class CareerHighlight(models.Model):
-    title = models.CharField(max_length=200)
-    organization = models.CharField(max_length=200)
-    date_range = models.CharField(max_length=100)
-    description = models.TextField(help_text="Markdown supported")
-    metrics = models.JSONField(default=list, help_text="List of achievements")
-    order = models.IntegerField(default=0)
-    is_current = models.BooleanField(default=False)
-    
-    class Meta:
-        ordering = ['-order', '-id']
-    
-    def __str__(self):
-        return f"{self.title} at {self.organization}"
-
-# portfolio_backend/blog/models.py
-from django.db import models
-from django.utils.text import slugify
-import re
-
-class BlogPost(models.Model):
-    CATEGORY_CHOICES = [
-        ('ai-trends', 'AI Trends'),
-        ('technical', 'Technical Deep Dive'),
-        ('industry', 'Industry Insights'),
-        ('tutorial', 'Tutorial'),
-        ('opinion', 'Opinion'),
-    ]
-    
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True, max_length=250)
-    excerpt = models.TextField(max_length=500)
-    content = models.TextField(help_text="Markdown supported")
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    featured_image = CloudinaryField('image', folder='portfolio/blog/', blank=True)
-    reading_time = models.IntegerField(editable=False)
-    published_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    is_published = models.BooleanField(default=False)
-    views = models.IntegerField(default=0)
-    
-    class Meta:
-        ordering = ['-published_date']
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
-        # Calculate reading time (average 200 words per minute)
-        word_count = len(re.findall(r'\w+', self.content))
-        self.reading_time = max(1, round(word_count / 200))
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.title
