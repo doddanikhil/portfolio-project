@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.db.models import Q
+from django.db.models import Q, Sum
 from .models import Project, Technology, TechCategory, CareerHighlight, SiteConfiguration
 from portfolio_backend.blog.models import BlogPost, ContactSubmission
 import resend
@@ -192,7 +192,8 @@ def career_highlights(request):
             'description': highlight.description,
             'metrics': highlight.metrics,
             'technologies': technologies,
-            'order': highlight.order
+            'order': highlight.order,
+            'is_current': highlight.is_current
         })
     
     return Response(data)
@@ -240,7 +241,7 @@ def site_stats(request):
         total_technologies = Technology.objects.count()
         blog_posts = BlogPost.objects.filter(is_published=True).count()
         total_views = BlogPost.objects.filter(is_published=True).aggregate(
-            total=models.Sum('views')
+            total=Sum('views')
         )['total'] or 0
         
         data = {
@@ -314,3 +315,10 @@ def contact_submit(request):
     except Exception as e:
         print(f"Contact form error: {e}")
         return Response({'error': 'Something went wrong. Please try again.'}, status=500)
+
+# Legacy function names for compatibility
+def technologies_list(request):
+    return tech_stack(request)
+
+def send_contact_email(request):
+    return contact_submit(request)

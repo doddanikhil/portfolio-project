@@ -11,4 +11,7 @@ urlpatterns = [
     path('metadata/', views.site_metadata, name='site_metadata'),
     path('stats/', views.site_stats, name='site_stats'),
     path('contact/', views.contact_submit, name='contact_submit'),
+    
+    # Legacy URLs for compatibility
+    path('technologies/', views.technologies_list, name='technologies_list'),
 ]

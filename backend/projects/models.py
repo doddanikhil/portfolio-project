@@ -1,4 +1,3 @@
-# backend/projects/models.py
 from django.db import models
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField
@@ -21,7 +20,7 @@ class Technology(models.Model):
     proficiency = models.IntegerField(choices=[(i, i) for i in range(1, 6)], default=3)
     description = models.TextField(blank=True)
     icon_url = models.URLField(blank=True)
-    color = models.CharField(max_length=7, default="#3B82F6")  # Hex color
+    color = models.CharField(max_length=7, default="#3B82F6")
     
     class Meta:
         verbose_name_plural = "Technologies"
@@ -80,6 +79,7 @@ class CareerHighlight(models.Model):
     metrics = models.JSONField(default=list, help_text='[{"metric": "Latency Reduction", "value": "40%"}]')
     technologies = models.ManyToManyField(Technology, blank=True)
     order = models.IntegerField(default=0)
+    is_current = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-order', '-id']
