@@ -414,15 +414,9 @@ HEALTH_CHECK_URL = '/api/v1/test/'
 # ========================================
 
 if not DEBUG:
-    # Database query optimization
-    DATABASES['default']['OPTIONS']['MAX_CONNS'] = 20
-    
     # File upload settings
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
     DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
-    
-    # Optimize database queries
-    DATABASES['default']['OPTIONS']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 # ========================================
 # ENVIRONMENT-SPECIFIC OVERRIDES
