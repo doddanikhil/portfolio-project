@@ -433,16 +433,10 @@ if env_settings_file.exists():
 if not DEBUG:
     required_env_vars = [
         'SECRET_KEY',
-        'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST',
-        'CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET',
+        'DATABASE_URL',
+        'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET',
     ]
-    
+
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
     if missing_vars:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
-
-# Ensure secret key is secure in production
-if not DEBUG and (not SECRET_KEY or SECRET_KEY == "unsafe-secret-key" or len(SECRET_KEY) < 50):
-    raise ValueError("SECRET_KEY must be set to a secure value (50+ characters) in production")
-
-print(f"🚀 Django settings loaded - DEBUG: {DEBUG}, Environment: {os.getenv('ENVIRONMENT', 'local')}")
