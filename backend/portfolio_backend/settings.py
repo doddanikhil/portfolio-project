@@ -94,29 +94,31 @@ WSGI_APPLICATION = 'portfolio_backend.wsgi.application'
 # backend/portfolio_backend/settings.py
 
 # After your existing DATABASES configuration (around line 95)
-import dj_database_url
-import sys
-
-# ======================================================
-# DATABASE CONFIGURATION (Supabase + Render)
-# ======================================================
-
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=0,
-        ssl_require=True
-    )
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT", "6543"),  # default to transaction pooler
+        "OPTIONS": {
+            "sslmode": "require",
+            "options": "-c default_transaction_isolation=read_committed"
+        },
+        "CONN_MAX_AGE": 0,  # no persistent connections (good for pgbouncer)
+    }
 }
 
-# Switch port automatically for migrations (Session pooler: 5432)
+# Switch port automatically for migrations
 IS_MIGRATION_COMMAND = any(
     arg in sys.argv for arg in ['migrate', 'makemigrations', 'sqlmigrate', 'showmigrations']
 )
-if IS_MIGRATION_COMMAND and "DATABASE_URL" in os.environ:
-    url = os.environ["DATABASE_URL"].replace(":6543/", ":5432/")
-    DATABASES["default"] = dj_database_url.parse(url, conn_max_age=0, ssl_require=True)
+if IS_MIGRATION_COMMAND:
     print("📦 Using Session Pooler for database migrations...")
+    DATABASES["default"]["PORT"] = "5432"
+else:
+    DATABASES["default"]["PORT"] = os.getenv("DB_PORT", "6543")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
