@@ -1,10 +1,3 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 export function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -45,4 +38,8 @@ export function isTablet() {
 export function isDesktop() {
   if (typeof window === 'undefined') return false;
   return window.innerWidth >= breakpoints.lg;
+}
+
+export function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
 }
