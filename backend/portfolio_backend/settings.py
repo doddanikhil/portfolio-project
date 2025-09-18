@@ -94,16 +94,15 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
+        "USER": os.getenv("DB_USER"), 
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "PORT": os.getenv("DB_PORT", "6543"),
         "OPTIONS": {
-            "sslmode": "require"
+            "sslmode": "require",
+            "options": "-c default_transaction_isolation=read_committed"
         },
-        # Production optimizations
-        "CONN_MAX_AGE": 60 if not DEBUG else 0,
-        "CONN_HEALTH_CHECKS": True,
+        "CONN_MAX_AGE": 0,  # Disable connection pooling on Django side
     }
 }
 
