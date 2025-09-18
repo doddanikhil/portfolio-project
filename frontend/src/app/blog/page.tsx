@@ -2,41 +2,62 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Calendar, Clock, Eye, Tag } from 'lucide-react';
-import { getBlogPosts, getBlogCategories, handleAPIError, type BlogPost, type BlogCategory } from '@/lib/api';
+import { Search, Filter, Calendar, Clock, ArrowRight } from 'lucide-react';
+import { getBlogPosts, getBlogCategories, type BlogPost, type BlogCategory } from '@/lib/api';
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [postsData, categoriesData] = await Promise.all([
-          getBlogPosts({ search: searchTerm, category: selectedCategory }),
+          getBlogPosts(),
           getBlogCategories(),
         ]);
 
         setPosts(postsData);
+        setFilteredPosts(postsData);
         setCategories(categoriesData);
       } catch (err) {
-        console.error('Blog page error:', err);
-        setError(handleAPIError(err));
+        setError('Failed to load blog posts');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [searchTerm, selectedCategory]);
+  }, []);
+
+  // Filter posts based on search and category
+  useEffect(() => {
+    let filtered = posts;
+
+    if (searchTerm) {
+      filtered = filtered.filter((post) =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter((post) => post.category === selectedCategory);
+    }
+
+    setFilteredPosts(filtered);
+  }, [posts, searchTerm, selectedCategory]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white/80">Loading blog posts...</p>
@@ -47,7 +68,7 @@ export default function BlogPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-white mb-2">Unable to Load Blog</h1>
@@ -64,38 +85,38 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-20">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">Latest Insights</h1>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Thoughts on AI, technology, and software engineering
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Blog</h1>
+          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+            Insights on AI, software engineering, and technology trends from the frontlines of applied machine learning
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-12 border border-white/20">
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-blue-400 transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-blue-400 backdrop-blur-sm"
               />
             </div>
 
             {/* Category Filter */}
             <div className="relative">
-              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-400 appearance-none"
+                className="pl-10 pr-8 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 backdrop-blur-sm appearance-none min-w-[180px]"
               >
                 <option value="" className="bg-slate-800">All Categories</option>
                 {categories.map((category) => (
@@ -107,119 +128,140 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {/* Active Filters */}
-          {(searchTerm || selectedCategory) && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {searchTerm && (
-                <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
-                  Search: {searchTerm}
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="ml-2 hover:text-red-300"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {selectedCategory && (
-                <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
-                  Category: {categories.find(c => c.key === selectedCategory)?.name}
-                  <button 
-                    onClick={() => setSelectedCategory('')}
-                    className="ml-2 hover:text-red-300"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-            </div>
-          )}
+          {/* Results count */}
+          <div className="mt-4 text-white/70 text-center">
+            Showing {filteredPosts.length} of {posts.length} articles
+          </div>
         </div>
 
-        {/* Blog Posts */}
-        {posts.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-2xl font-bold text-white mb-2">No Posts Found</h3>
-            <p className="text-white/70">
-              {searchTerm || selectedCategory 
-                ? 'Try adjusting your search criteria' 
-                : 'Blog posts coming soon! Check back later.'
-              }
-            </p>
-          </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {posts.map((post) => (
-              <Link 
-                key={post.slug} 
-                href={`/blog/${post.slug}`}
-                className="group block"
-              >
-                <article className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all hover:transform hover:scale-105 hover:shadow-2xl">
-                  {/* Featured Badge */}
-                  {post.is_featured && (
-                    <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black text-xs font-bold rounded-full">
-                      Featured
-                    </div>
-                  )}
-
-                  {/* Featured Image */}
-                  {post.featured_image && (
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={post.featured_image} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    {/* Category */}
-                    <div className="inline-block px-3 py-1 bg-blue-600/20 text-blue-400 text-sm rounded-full mb-3">
-                      {categories.find(c => c.key === post.category)?.name || post.category}
-                    </div>
-
-                    {/* Title */}
-                    <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors mb-3 line-clamp-2">
-                      {post.title}
-                    </h2>
-
-                    {/* Excerpt */}
-                    <p className="text-white/70 mb-4 line-clamp-3">{post.excerpt}</p>
-
-                    {/* Meta Info */}
-                    <div className="flex items-center justify-between text-sm text-white/50">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{post.reading_time} min read</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          <span>{post.views} views</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(post.published_date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
+        {/* Featured Post */}
+        {filteredPosts.length > 0 && filteredPosts[0].is_featured && (
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-sm rounded-full border border-yellow-500/30">
+                  Featured
+                </span>
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm rounded-full">
+                  {filteredPosts[0].category}
+                </span>
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                {filteredPosts[0].title}
+              </h2>
+              
+              <p className="text-white/80 text-lg mb-6 line-clamp-2">
+                {filteredPosts[0].excerpt}
+              </p>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4 text-white/60">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">
+                      {new Date(filteredPosts[0].published_date).toLocaleDateString()}
+                    </span>
                   </div>
-                </article>
-              </Link>
-            ))}
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm">{filteredPosts[0].reading_time} min read</span>
+                  </div>
+                </div>
+                
+                <Link
+                  href={`/blog/${filteredPosts[0].slug}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Read More
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Results Count */}
-        <div className="text-center mt-12">
-          <p className="text-white/60">
-            Showing {posts.length} article{posts.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+        {/* Posts Grid */}
+        {filteredPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredPosts
+              .filter((_, index) => !(index === 0 && filteredPosts[0].is_featured))
+              .map((post) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group block"
+                >
+                  <article className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all hover:transform hover:scale-105 h-full flex flex-col">
+                    {/* Featured Image */}
+                    {post.featured_image && (
+                      <div className="w-full h-48 mb-4 rounded-xl overflow-hidden">
+                        <img 
+                          src={post.featured_image} 
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Meta */}
+                    <div className="flex items-center gap-4 text-white/60 text-sm mb-3">
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">
+                        {post.category}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{post.reading_time} min read</span>
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      
+                      <p className="text-white/80 mb-4 flex-1 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                      
+                      {/* Date and Views */}
+                      <div className="flex items-center justify-between text-white/60 text-sm pt-4 border-t border-white/10">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(post.published_date).toLocaleDateString()}</span>
+                        </div>
+                        {post.views > 0 && (
+                          <span>{post.views} views</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-blue-400 text-sm font-medium">
+                      Read more →
+                    </div>
+                  </article>
+                </Link>
+              ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">📝</div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Articles Found</h3>
+            <p className="text-white/70 mb-6">
+              Try adjusting your search or filter criteria
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('');
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
