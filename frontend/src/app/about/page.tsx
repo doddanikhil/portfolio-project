@@ -37,10 +37,10 @@ export default function AboutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center page-container">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/80">Loading about page...</p>
+          <p className="text-white-secondary">Loading about page...</p>
         </div>
       </div>
     );
@@ -48,11 +48,11 @@ export default function AboutPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center page-container">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-white mb-2">Unable to Load About Page</h1>
-          <p className="text-white/70 mb-6">{error}</p>
+          <h1 className="text-2xl font-bold text-white-contrast mb-2">Unable to Load About Page</h1>
+          <p className="text-white-muted mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -65,12 +65,12 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen page-container">
       <div className="container mx-auto px-4 py-20">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">About Me</h1>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold text-white-contrast mb-4">About Me</h1>
+          <p className="text-xl text-white-secondary max-w-2xl mx-auto">
             Get to know the person behind the code
           </p>
         </div>
@@ -79,23 +79,23 @@ export default function AboutPage() {
           {/* Personal Info */}
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Profile */}
-            <div className="lg:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+            <div className="lg:col-span-2 glass-card rounded-2xl p-8">
               <div className="flex flex-col md:flex-row gap-6 mb-6">
                 {siteConfig?.profile_image && (
                   <img 
                     src={siteConfig.profile_image} 
                     alt={siteConfig.name}
-                    className="w-32 h-32 rounded-2xl object-cover border-4 border-white/20"
+                    className="w-32 h-32 rounded-2xl object-cover border-4 border-white/20 shadow-2xl"
                   />
                 )}
                 <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-white mb-2">
+                  <h2 className="text-3xl font-bold text-white-contrast mb-2">
                     {siteConfig?.name || 'Nikhil Dodda'}
                   </h2>
                   <p className="text-xl text-blue-400 mb-4">
                     {siteConfig?.tagline || 'Applied AI Engineer'}
                   </p>
-                  <p className="text-white/70 leading-relaxed">
+                  <p className="text-white-secondary leading-relaxed">
                     {siteConfig?.bio || 'Building intelligent applications that solve real business problems.'}
                   </p>
                 </div>
@@ -109,10 +109,10 @@ export default function AboutPage() {
                       <Mail className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Email</p>
+                      <p className="text-white-muted text-sm">Email</p>
                       <Link 
                         href={`mailto:${siteConfig.email}`}
-                        className="text-white hover:text-blue-400 transition-colors"
+                        className="text-white-contrast hover:text-blue-400 transition-colors"
                       >
                         {siteConfig.email}
                       </Link>
@@ -126,8 +126,8 @@ export default function AboutPage() {
                       <MapPin className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Location</p>
-                      <p className="text-white">{siteConfig.location}</p>
+                      <p className="text-white-muted text-sm">Location</p>
+                      <p className="text-white-contrast">{siteConfig.location}</p>
                     </div>
                   </div>
                 )}
@@ -151,32 +151,32 @@ export default function AboutPage() {
                 <Link
                   href={siteConfig.calendar_url}
                   target="_blank"
-                  className="w-full flex items-center gap-3 px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all group border border-white/20"
+                  className="w-full flex items-center gap-3 px-6 py-4 glass-card rounded-xl transition-all group border border-white/20"
                 >
-                  <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span>Schedule Meeting</span>
+                  <Calendar className="w-5 h-5 text-white-contrast group-hover:scale-110 transition-transform" />
+                  <span className="text-white-contrast">Schedule Meeting</span>
                 </Link>
               )}
 
               <Link
                 href="/connect"
-                className="w-full flex items-center gap-3 px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all group border border-white/20"
+                className="w-full flex items-center gap-3 px-6 py-4 glass-card rounded-xl transition-all group border border-white/20"
               >
-                <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                <span>Get in Touch</span>
+                <Mail className="w-5 h-5 text-white-contrast group-hover:scale-110 transition-transform" />
+                <span className="text-white-contrast">Get in Touch</span>
               </Link>
             </div>
           </div>
 
           {/* Career Highlights */}
           {highlights.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-6">Career Highlights</h3>
+            <div className="glass-card rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white-contrast mb-6">Career Highlights</h3>
               <div className="space-y-6">
                 {highlights.map((highlight, index) => (
                   <div key={index} className="border-l-4 border-blue-400 pl-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                      <h4 className="text-xl font-semibold text-white">
+                      <h4 className="text-xl font-semibold text-white-contrast">
                         {highlight.title}
                       </h4>
                       <span className="text-blue-400 text-sm">
@@ -186,38 +186,19 @@ export default function AboutPage() {
                     <p className="text-purple-400 font-medium mb-2">
                       {highlight.organization}
                     </p>
-                    <p className="text-white/70 mb-4">
+                    <p className="text-white-secondary mb-4">
                       {highlight.description}
                     </p>
                     
                     {/* Metrics */}
-                    {highlight.metrics.length > 0 && (
-                      <div className="flex flex-wrap gap-3 mb-4">
-                        {highlight.metrics.map((metric, idx) => (
+                    {highlight.metrics && highlight.metrics.length > 0 && (
+                      <div className="flex flex-wrap gap-3">
+                        {highlight.metrics.map((metric: any, idx: number) => (
                           <span 
                             key={idx}
                             className="px-3 py-1 bg-green-600/20 text-green-400 text-sm rounded-full"
                           >
-                            {metric.metric}: {metric.value}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Technologies */}
-                    {highlight.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {highlight.technologies.map((tech) => (
-                          <span 
-                            key={tech.name}
-                            className="px-2 py-1 text-xs rounded-md border"
-                            style={{ 
-                              color: tech.color || '#3B82F6',
-                              borderColor: tech.color || '#3B82F6',
-                              backgroundColor: `${tech.color || '#3B82F6'}10`
-                            }}
-                          >
-                            {tech.name}
+                            {typeof metric === 'object' ? `${metric.metric}: ${metric.value}` : metric}
                           </span>
                         ))}
                       </div>
@@ -230,12 +211,12 @@ export default function AboutPage() {
 
           {/* Tech Stack */}
           {techStack.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-6">Technology Stack</h3>
+            <div className="glass-card rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white-contrast mb-6">Technology Stack</h3>
               <div className="space-y-8">
                 {techStack.map((category) => (
                   <div key={category.category}>
-                    <h4 className="text-lg font-semibold text-white mb-4">
+                    <h4 className="text-lg font-semibold text-white-contrast mb-4">
                       {category.category}
                     </h4>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -259,9 +240,9 @@ export default function AboutPage() {
                             </div>
                           )}
                           <div className="flex-1">
-                            <p className="text-white font-medium">{tech.name}</p>
+                            <p className="text-white-contrast font-medium">{tech.name}</p>
                             {tech.description && (
-                              <p className="text-white/50 text-sm">{tech.description}</p>
+                              <p className="text-white-muted text-sm">{tech.description}</p>
                             )}
                           </div>
                           <div className="flex gap-1">
@@ -287,8 +268,8 @@ export default function AboutPage() {
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Let's Work Together</h3>
-            <p className="text-white/70 mb-6 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-white-contrast mb-4">Let's Work Together</h3>
+            <p className="text-white-secondary mb-6 max-w-2xl mx-auto">
               Interested in collaborating or have a project in mind? I'm always open to discussing new opportunities and challenges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -300,7 +281,7 @@ export default function AboutPage() {
               </Link>
               <Link
                 href="/projects"
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold transition-all border border-white/20"
+                className="px-8 py-4 glass-card rounded-xl font-semibold transition-all border border-white/20 text-white-contrast"
               >
                 View My Work
               </Link>
