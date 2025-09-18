@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: portfolio-backend-api
+    runtime: python3
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn portfolio_backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/v1/test/
+    autoDeploy: true
+    repo: https://github.com/iamdevnd/portfolio-project.git
+    branch: main
+    rootDir: backend
