@@ -7,6 +7,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://iamdevnd.dev'),
   title: 'Nikhil Dodda - Applied AI Engineer',
   description: 'Applied AI Engineer specializing in production LLM systems and scalable cloud infrastructure. Building intelligent applications that solve real business problems.',
   keywords: 'AI Engineer, Machine Learning, LLM, RAG, Python, AWS, Software Engineering',

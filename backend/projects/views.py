@@ -13,7 +13,10 @@ import resend
 import os
 
 # Configure Resend API key from settings/environment (no hardcoded default)
-resend.api_key = os.getenv("RESEND_API_KEY", "re_cLyUBKP3_BgQevi4fU8ZtLikDp8agzQN2")
+resend.api_key = os.getenv("RESEND_API_KEY", "")
+if not resend.api_key:
+    # In production, prefer proper logging; keeping simple raise to avoid silent misconfig
+    raise RuntimeError("RESEND_API_KEY is not set. Configure it in your environment.")
 
 
 @api_view(['GET'])
