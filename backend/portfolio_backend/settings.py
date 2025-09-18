@@ -89,7 +89,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'portfolio_backend.wsgi.application'
 
-# Database - Enhanced for production
+# backend/portfolio_backend/settings.py
+
+# After your existing DATABASES configuration (around line 95)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -102,9 +104,21 @@ DATABASES = {
             "sslmode": "require",
             "options": "-c default_transaction_isolation=read_committed"
         },
-        "CONN_MAX_AGE": 0,  # Disable connection pooling on Django side
+        "CONN_MAX_AGE": 0,
     }
 }
+
+# AUTO-DETECT MIGRATION MODE AND SWITCH PORTS
+import sys
+IS_MIGRATION_COMMAND = any(arg in sys.argv for arg in ['migrate', 'makemigrations', 'sqlmigrate', 'showmigrations'])
+
+if IS_MIGRATION_COMMAND:
+    # Use Session Pooler (port 5432) for migrations
+    print("📦 Using Session Pooler for database migrations...")
+    DATABASES["default"]["PORT"] = "5432"
+else:
+    # Use Transaction Pooler (port 6543) for normal operations
+    DATABASES["default"]["PORT"] = os.getenv("DB_PORT", "6543")
 
 # Enhanced connection options for production
 if not DEBUG:
