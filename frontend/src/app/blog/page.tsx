@@ -57,7 +57,7 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white/80">Loading blog posts...</p>
@@ -68,7 +68,7 @@ export default function BlogPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-white mb-2">Unable to Load Blog</h1>
@@ -85,12 +85,17 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <div className="fixed top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
+      <div className="container mx-auto px-4 py-20 relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Blog</h1>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          <p className="text-xl text-white/90 max-w-3xl mx-auto">
             Insights on AI, software engineering, and technology trends from the frontlines of applied machine learning
           </p>
         </div>
@@ -151,7 +156,7 @@ export default function BlogPage() {
                 {filteredPosts[0].title}
               </h2>
               
-              <p className="text-white/80 text-lg mb-6 line-clamp-2">
+              <p className="text-white/90 text-lg mb-6 line-clamp-2">
                 {filteredPosts[0].excerpt}
               </p>
               
@@ -221,7 +226,7 @@ export default function BlogPage() {
                         {post.title}
                       </h3>
                       
-                      <p className="text-white/80 mb-4 flex-1 line-clamp-3">
+                      <p className="text-white/90 mb-4 flex-1 line-clamp-3">
                         {post.excerpt}
                       </p>
                       

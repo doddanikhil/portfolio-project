@@ -2,6 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables for theme colors */
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+  }
+}
+
+/* Dark mode (default) */
+.dark {
+  background: linear-gradient(135deg, rgb(15 23 42), rgb(88 28 135), rgb(15 23 42));
+  min-height: 100vh;
+}
+
+/* Light mode */
+.light {
+  background: linear-gradient(135deg, rgb(241 245 249), rgb(219 234 254), rgb(241 245 249));
+  min-height: 100vh;
+}
+
+/* Navigation styles for both themes */
+.dark nav {
+  --nav-bg: rgba(0, 0, 0, 0.8);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-text: rgb(255, 255, 255);
+  --nav-text-hover: rgb(96, 165, 250);
+}
+
+.light nav {
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --nav-border: rgba(0, 0, 0, 0.1);
+  --nav-text: rgb(15, 23, 42);
+  --nav-text-hover: rgb(59, 130, 246);
+}
+
+/* Card styles for both themes */
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+/* Text colors for themes */
+.dark .theme-text {
+  color: rgb(255, 255, 255);
+}
+
+.light .theme-text {
+  color: rgb(15, 23, 42);
+}
+
+.dark .theme-text-muted {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.light .theme-text-muted {
+  color: rgba(15, 23, 42, 0.8);
+}
+
+/* Button styles for themes */
+.dark .theme-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgb(255, 255, 255);
+}
+
+.light .theme-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgb(15, 23, 42);
+}
+
 /* Custom utilities for better mobile experience */
 @layer utilities {
   .line-clamp-2 {
@@ -45,25 +162,42 @@ html {
   width: 8px;
 }
 
-::-webkit-scrollbar-track {
+.dark ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
 }
 
-::-webkit-scrollbar-thumb {
+.light ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb {
   background: rgba(59, 130, 246, 0.5);
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.light ::-webkit-scrollbar-thumb {
   background: rgba(59, 130, 246, 0.7);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8);
 }
 
 /* Focus states for accessibility */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus {
+.dark button:focus,
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
   outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+.light button:focus,
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  outline: 2px solid #2563EB;
   outline-offset: 2px;
 }
 
@@ -97,12 +231,4 @@ select:focus {
 
 .animate-slide-up {
   animation: slideUp 0.5s ease-out;
-}
-
-/* Dark theme optimizations */
-@media (prefers-color-scheme: dark) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
-  }
 }

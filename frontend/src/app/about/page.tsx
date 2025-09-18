@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Mail, MapPin, Calendar, Download, ExternalLink, Github, Linkedin } from 'lucide-react';
-import { getTechStack, getCareerHighlights, getSiteMetadata, handleAPIError, type TechCategory, type CareerHighlight, type SiteMetadata } from '@/lib/api';
+import { Mail, MapPin, Calendar, Download, Github, Linkedin } from 'lucide-react';
+import { getTechStack, getSiteMetadata, handleAPIError, type TechCategory, type SiteMetadata } from '@/lib/api';
 
 export default function AboutPage() {
   const [techStack, setTechStack] = useState<TechCategory[]>([]);
-  const [highlights, setHighlights] = useState<CareerHighlight[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,14 +14,12 @@ export default function AboutPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [techData, highlightsData, configData] = await Promise.all([
+        const [techData, configData] = await Promise.all([
           getTechStack(),
-          getCareerHighlights(),
           getSiteMetadata(),
         ]);
 
         setTechStack(techData);
-        setHighlights(highlightsData);
         setSiteConfig(configData);
       } catch (err) {
         console.error('About page error:', err);
@@ -37,7 +34,7 @@ export default function AboutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white/80">Loading about page...</p>
@@ -48,7 +45,7 @@ export default function AboutPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-white mb-2">Unable to Load About Page</h1>
@@ -65,12 +62,17 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <div className="fixed top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
+      <div className="container mx-auto px-4 py-20 relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">About Me</h1>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          <p className="text-xl text-white/90 max-w-3xl mx-auto">
             {siteConfig?.bio || "Passionate about building AI systems that make a real impact."}
           </p>
         </div>
@@ -139,6 +141,29 @@ export default function AboutPage() {
           </div>
         </div>
 
+        {/* My Story Section */}
+        <div className="max-w-4xl mx-auto mb-20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+            <h2 className="text-3xl font-bold text-white text-center mb-8">My Story</h2>
+            <div className="prose prose-lg prose-invert max-w-none">
+              <p className="text-white/90 text-lg leading-relaxed mb-6">
+                I'm passionate about building AI systems that solve real-world problems. My journey in technology 
+                started with a fascination for how machines can learn and adapt, which led me to specialize in 
+                applied artificial intelligence and machine learning.
+              </p>
+              <p className="text-white/90 text-lg leading-relaxed mb-6">
+                Today, I focus on developing production-ready LLM systems, RAG applications, and scalable AI 
+                infrastructure. I believe in the power of technology to transform industries and improve lives, 
+                and I'm committed to building solutions that are both innovative and practical.
+              </p>
+              <p className="text-white/90 text-lg leading-relaxed">
+                When I'm not coding or designing AI systems, you'll find me exploring the latest research papers, 
+                contributing to open-source projects, or sharing knowledge through writing and speaking engagements.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Tech Stack */}
         {techStack.length > 0 && (
           <section className="mb-20">
@@ -182,63 +207,11 @@ export default function AboutPage() {
           </section>
         )}
 
-        {/* Career Highlights */}
-        {highlights.length > 0 && (
-          <section className="mb-20">
-            <h2 className="text-3xl font-bold text-white text-center mb-12">Career Journey</h2>
-            <div className="space-y-8">
-              {highlights.map((highlight, index) => (
-                <div
-                  key={index}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-white">
-                        {highlight.title}
-                      </h3>
-                      <p className="text-blue-400 font-medium">
-                        {highlight.organization}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-white/70 mt-2 md:mt-0">
-                      <Calendar className="w-4 h-4" />
-                      <span>{highlight.date_range}</span>
-                      {highlight.is_current && (
-                        <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                          Current
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <p className="text-white/80 mb-4">{highlight.description}</p>
-                  
-                  {highlight.metrics && highlight.metrics.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {highlight.metrics.map((metric, idx) => (
-                        <div key={idx} className="bg-white/5 rounded-lg p-3">
-                          <div className="text-blue-400 font-semibold">
-                            {metric.value}
-                          </div>
-                          <div className="text-white/70 text-sm">
-                            {metric.metric}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Connect Section */}
         <section className="text-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
             <h2 className="text-3xl font-bold text-white mb-4">Let's Connect</h2>
-            <p className="text-white/70 mb-8 max-w-2xl mx-auto">
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
               Interested in collaborating on AI projects or discussing technology? 
               I'd love to hear from you.
             </p>

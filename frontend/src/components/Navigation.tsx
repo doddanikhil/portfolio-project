@@ -3,17 +3,27 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Github, Linkedin, FileText, Calendar } from 'lucide-react';
+import { Menu, X, Github, Linkedin, FileText, Calendar, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/components/theme-provider';
 import { getSiteMetadata, type SiteMetadata } from '@/lib/api';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [siteConfig, setSiteConfig] = useState<SiteMetadata | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -27,6 +37,7 @@ export default function Navigation() {
         console.error('Failed to fetch site config:', error);
       }
     };
+
     fetchConfig();
   }, []);
 
@@ -43,26 +54,23 @@ export default function Navigation() {
     return pathname?.startsWith(href);
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-black/80 backdrop-blur-md border-b border-white/10'
-          : 'bg-transparent'
-      }`}
-    >
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'bg-black/80 backdrop-blur-md border-b border-white/10' 
+        : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">
-                {siteConfig?.name
-                  ? siteConfig.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                  : 'ND'}
+                {siteConfig?.name ? siteConfig.name.split(' ').map(n => n[0]).join('') : 'ND'}
               </span>
             </div>
             <span className="text-white font-semibold hidden sm:block">
@@ -87,13 +95,25 @@ export default function Navigation() {
             ))}
           </div>
 
-          {/* Desktop Social Links */}
+          {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme Toggle */}
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-white hover:text-blue-400 transition-colors rounded-lg hover:bg-white/10"
+                title="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+            )}
+
+            {/* Social Links */}
             {siteConfig?.github_url && (
               <Link
                 href={siteConfig.github_url}
                 target="_blank"
-                className="text-white hover:text-blue-400 transition-colors"
+                className="p-2 text-white hover:text-blue-400 transition-colors rounded-lg hover:bg-white/10"
               >
                 <Github className="w-5 h-5" />
               </Link>
@@ -102,7 +122,7 @@ export default function Navigation() {
               <Link
                 href={siteConfig.linkedin_url}
                 target="_blank"
-                className="text-white hover:text-blue-400 transition-colors"
+                className="p-2 text-white hover:text-blue-400 transition-colors rounded-lg hover:bg-white/10"
               >
                 <Linkedin className="w-5 h-5" />
               </Link>
@@ -111,7 +131,7 @@ export default function Navigation() {
               <Link
                 href={siteConfig.resume_url}
                 target="_blank"
-                className="text-white hover:text-blue-400 transition-colors"
+                className="p-2 text-white hover:text-blue-400 transition-colors rounded-lg hover:bg-white/10"
               >
                 <FileText className="w-5 h-5" />
               </Link>
@@ -154,7 +174,20 @@ export default function Navigation() {
                   {item.name}
                 </Link>
               ))}
-
+              
+              {/* Mobile Theme Toggle */}
+              {mounted && (
+                <div className="px-3 py-2">
+                  <button
+                    onClick={toggleTheme}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                  >
+                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </button>
+                </div>
+              )}
+              
               {/* Mobile Social Links */}
               <div className="flex items-center justify-center space-x-4 pt-4 mt-4 border-t border-white/20">
                 {siteConfig?.github_url && (
@@ -185,7 +218,7 @@ export default function Navigation() {
                   </Link>
                 )}
               </div>
-
+              
               {siteConfig?.calendar_url && (
                 <div className="px-3 py-2">
                   <Link

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { ThemeProvider } from '@/components/theme-provider';
 import Navigation from '@/components/Navigation';
-import { GlobalBackground } from '@/components/ui/GlobalBackground';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -37,13 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} min-h-screen`}>
-        <GlobalBackground />
-        <Navigation />
-        <main className="relative z-10 pt-16">
-          {children}
-        </main>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-slate-900`}>
+        <ThemeProvider defaultTheme="dark" storageKey="portfolio-theme">
+          <Navigation />
+          <main className="pt-16">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

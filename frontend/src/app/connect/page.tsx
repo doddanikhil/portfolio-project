@@ -49,7 +49,7 @@ export default function ConnectPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -72,12 +72,17 @@ export default function ConnectPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <div className="fixed top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
+      <div className="container mx-auto px-4 py-20 relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Let's Connect</h1>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          <p className="text-xl text-white/90 max-w-3xl mx-auto">
             Ready to discuss your next AI project or explore collaboration opportunities? 
             I'd love to hear from you.
           </p>
@@ -140,6 +145,7 @@ export default function ConnectPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors"
+                      title="GitHub"
                     >
                       <Github className="w-6 h-6 text-white" />
                     </a>
@@ -150,6 +156,7 @@ export default function ConnectPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors"
+                      title="LinkedIn"
                     >
                       <Linkedin className="w-6 h-6 text-white" />
                     </a>
@@ -160,6 +167,7 @@ export default function ConnectPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-colors"
+                      title="Schedule Meeting"
                     >
                       <Calendar className="w-6 h-6 text-white" />
                     </a>
