@@ -43,7 +43,7 @@ def site_config(request):
                 'tagline': 'Applied AI Engineer',
                 'bio': 'Applied AI Engineer specializing in production LLM systems and scalable cloud infrastructure.',
                 'email': 'hello@nikhildodda.dev',
-                'github_url': 'https://github.com/doddanikhil',
+                'github_url': 'https://github.com/iamdevnd',
                 'bluesky_handle': '@devdn.bsky.social',
                 'cal_com_username': 'dnpro',
                 'linkedin_url': '',  # Empty since you don't want LinkedIn
@@ -152,7 +152,7 @@ def send_contact_email(request):
                 </div>
                 
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
-                    <p>Sent from your portfolio contact form at nikhildodda.dev</p>
+                    <p>Sent from your portfolio contact form at iamdevnd.dev</p>
                     <p>Time: {contact_submission.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
                 </div>
             </div>

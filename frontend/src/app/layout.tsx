@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://nikhildodda.dev',
+    url: 'https://iamdevnd.dev',
     title: 'Nikhil Dodda - Applied AI Engineer',
     description: 'Applied AI Engineer specializing in production LLM systems and scalable cloud infrastructure.',
     siteName: 'Nikhil Dodda Portfolio',

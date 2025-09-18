@@ -14,10 +14,10 @@ if not SiteConfiguration.objects.exists():
         bio="Building intelligent applications that solve real business problems.",
         location="Ashburn, Virginia", 
         email="hello@nikhildodda.dev",
-        github_url="https://github.com/nikhildodda",
-        linkedin_url="https://linkedin.com/in/nikhildodda",
-        calendar_url="https://cal.com/nikhildodda",
-        resume_url="https://nikhildodda.dev/resume.pdf"
+        github_url="https://github.com/iamdevnd",
+        linkedin_url="https://linkedin.com/in/",
+        calendar_url="https://cal.com/dnpro",
+        resume_url="https://iamdevnd.dev/resume.pdf"
     )
     print("✅ Site configuration created")
 else:
@@ -70,7 +70,7 @@ project, created = Project.objects.get_or_create(
     defaults={
         'tagline': "Hybrid RAG system combining vector search with graph-based reasoning",
         'is_featured': True,
-        'github_url': "https://github.com/nikhildodda/contextcache",
+        'github_url': "https://github.com/iamdevnd/contextcache",
         'priority': 10
     }
 )
