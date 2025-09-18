@@ -4,6 +4,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import psycopg2
+import sys
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
