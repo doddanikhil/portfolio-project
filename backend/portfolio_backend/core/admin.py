@@ -1,116 +1,64 @@
-# backend/portfolio_backend/core/admin.py (UPDATED)
+# backend/portfolio_backend/core/admin.py
 from django.contrib import admin
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
-from .models import CareerHighlight, SiteConfiguration, ContactSubmission
+from .models import CareerHighlight, ContactSubmission, SiteConfiguration
+
 
 @admin.register(CareerHighlight)
 class CareerHighlightAdmin(admin.ModelAdmin):
     list_display = ['title', 'organization', 'date_range', 'is_current', 'order']
-    list_editable = ['order', 'is_current']
     list_filter = ['is_current', 'organization']
+    list_editable = ['is_current', 'order']
     search_fields = ['title', 'organization', 'description']
-    ordering = ['-order', '-is_current']
+    ordering = ['-is_current', '-order']
+
+
+@admin.register(ContactSubmission)
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'subject', 'company', 'submitted_at', 'is_read']
+    list_filter = ['is_read', 'submitted_at']
+    list_editable = ['is_read']
+    search_fields = ['name', 'email', 'subject', 'company']
+    readonly_fields = ['submitted_at']
+    ordering = ['-submitted_at']
     
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('title', 'organization', 'date_range', 'is_current')
+        ('Contact Information', {
+            'fields': ('name', 'email', 'company')
         }),
-        ('Content', {
-            'fields': ('description', 'metrics')
+        ('Message', {
+            'fields': ('subject', 'message')
         }),
-        ('Display', {
-            'fields': ('order',)
+        ('Status', {
+            'fields': ('is_read', 'submitted_at')
         })
     )
+
 
 @admin.register(SiteConfiguration)
 class SiteConfigurationAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('site_name', 'tagline', 'bio'),
-            'description': 'Core information about you and your site'
-        }),
-        ('Media', {
-            'fields': ('profile_image', 'resume_file', 'show_resume_download', 'custom_resume_text'),
-            'description': 'Profile photo and resume file (resume is optional)',
-            'classes': ('collapse',)
+        ('Personal Information', {
+            'fields': ('name', 'tagline', 'bio', 'location')
         }),
         ('Contact Information', {
-            'fields': ('email', 'github_url', 'bluesky_handle', 'cal_com_username'),
-            'description': 'Your primary contact methods and social profiles'
+            'fields': ('email', 'phone')
         }),
-        ('Legacy Social (Optional)', {
-            'fields': ('linkedin_url', 'twitter_url'),
-            'description': 'Optional legacy social media links',
-            'classes': ('collapse',)
+        ('Social Links', {
+            'fields': ('github_url', 'linkedin_url', 'twitter_url', 'calendar_url', 'resume_url')
         }),
-        ('SEO & Metadata', {
-            'fields': ('meta_description', 'meta_keywords'),
-            'description': 'Search engine optimization settings',
-            'classes': ('collapse',)
+        ('SEO Settings', {
+            'fields': ('meta_description', 'meta_keywords')
+        }),
+        ('Statistics', {
+            'fields': ('years_experience', 'projects_completed', 'technologies_mastered', 'coffee_consumed')
         })
     )
     
-    readonly_fields = ['created_at', 'updated_at']
-    
     def has_add_permission(self, request):
-        # Only allow one configuration
+        # Only allow one site configuration
         return not SiteConfiguration.objects.exists()
     
     def has_delete_permission(self, request, obj=None):
-        # Don't allow deletion of site config
+        # Don't allow deletion of site configuration
         return False
-    
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        # Add help text
-        if 'bluesky_handle' in form.base_fields:
-            form.base_fields['bluesky_handle'].help_text = 'Your Bluesky handle (e.g., @devdn.bsky.social)'
-        if 'cal_com_username' in form.base_fields:
-            form.base_fields['cal_com_username'].help_text = 'Your Cal.com username for scheduling (e.g., dnpro)'
-        return form
-
-@admin.register(ContactSubmission)
-class ContactSubmissionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'subject', 'company', 'created_at', 'is_read', 'replied', 'is_recent_indicator']
-    list_filter = ['is_read', 'replied', 'created_at', 'company']
-    search_fields = ['name', 'email', 'subject', 'message', 'company']
-    readonly_fields = ['name', 'email', 'company', 'subject', 'message', 'created_at', 'ip_address', 'user_agent']
-    list_editable = ['is_read', 'replied']
-    date_hierarchy = 'created_at'
-    
-    fieldsets = (
-        ('Contact Details', {
-            'fields': ('name', 'email', 'company', 'subject')
-        }),
-        ('Message', {
-            'fields': ('message',),
-            'classes': ('wide',)
-        }),
-        ('Status', {
-            'fields': ('is_read', 'replied')
-        }),
-        ('Metadata', {
-            'fields': ('created_at', 'ip_address', 'user_agent'),
-            'classes': ('collapse',)
-        })
-    )
-    
-    def has_add_permission(self, request):
-        return False  # Only allow viewing/editing, not adding
-    
-    def is_recent_indicator(self, obj):
-        if obj.is_recent:
-            return format_html('<span style="color: #28a745; font-weight: bold;">●</span>')
-        return format_html('<span style="color: #6c757d;">○</span>')
-    is_recent_indicator.short_description = "Recent"
-    is_recent_indicator.admin_order_field = 'created_at'
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related()
-
-# Customize admin site header
-admin.site.site_header = "Nikhil Dodda - Portfolio Admin"
-admin.site.site_title = "Portfolio Admin"
-admin.site.index_title = "Portfolio Content Management"

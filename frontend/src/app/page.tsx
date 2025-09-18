@@ -1,239 +1,357 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Calendar, Clock } from 'lucide-react';
-import { getRecentBlogPosts, getSiteMetadata, getSiteStats, handleAPIError, type BlogPost, type SiteMetadata, type SiteStats } from '@/lib/api';
+// frontend/src/app/page.tsx
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Github, ExternalLink, Download, Calendar, Mail } from 'lucide-react'
+import { api, Project, BlogPost, PortfolioStats, SiteMetadata } from '@/lib/api'
+import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HomePage() {
-  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
-  const [siteConfig, setSiteConfig] = useState<SiteMetadata | null>(null);
-  const [stats, setStats] = useState<SiteStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([])
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
+  const [stats, setStats] = useState<PortfolioStats | null>(null)
+  const [metadata, setMetadata] = useState<SiteMetadata | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        const [postsData, configData, statsData] = await Promise.all([
-          getRecentBlogPosts(),
-          getSiteMetadata(),
-          getSiteStats(),
-        ]);
-
-        setRecentPosts(postsData);
-        setSiteConfig(configData);
-        setStats(statsData);
-      } catch (err) {
-        console.error('Homepage error:', err);
-        setError(handleAPIError(err));
+        const [projectsData, postsData, statsData, metaData] = await Promise.all([
+          api.getFeaturedProjects(),
+          api.getRecentBlogPosts(),
+          api.getStats(),
+          api.getMetadata()
+        ])
+        
+        setFeaturedProjects(projectsData)
+        setRecentPosts(postsData)
+        setStats(statsData)
+        setMetadata(metaData)
+      } catch (error) {
+        console.error('Failed to load homepage data:', error)
+        // Set fallback data
+        setMetadata({
+          name: 'Nikhil Dodda',
+          tagline: 'Applied AI Engineer',
+          bio: 'Building intelligent applications that solve real business problems.',
+          location: 'Ashburn, Virginia',
+          email: 'hello@nikhildodda.dev',
+          phone: '',
+          github_url: 'https://github.com/nikhildodda',
+          linkedin_url: 'https://linkedin.com/in/nikhildodda',
+          twitter_url: '',
+          calendar_url: 'https://cal.com/nikhildodda',
+          resume_url: '/resume.pdf',
+          meta_description: '',
+          meta_keywords: '',
+          years_experience: 2,
+          projects_completed: 5,
+          technologies_mastered: 20,
+          coffee_consumed: 1000
+        })
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    loadData()
+  }, [])
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-white/80">Loading portfolio...</p>
-        </div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Unable to Load Portfolio</h1>
-          <p className="text-gray-600 dark:text-white/70 mb-6">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+    )
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Background Effects */}
-      <div className="fixed inset-0 -z-10">
-        {/* Dark mode background */}
-        <div className="dark:block hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-full"></div>
-        {/* Light mode background */}
-        <div className="light:block dark:hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-full"></div>
-        
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-        
-        {/* Floating orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            {/* Profile Image */}
-            {siteConfig?.profile_image && (
-              <div className="w-32 h-32 mx-auto mb-8 rounded-full overflow-hidden border-4 border-white/30 dark:border-white/30 border-gray-300/50">
-                <img
-                  src={siteConfig.profile_image}
-                  alt={siteConfig.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6">
-              {siteConfig?.name || "Nikhil Dodda"}
+      <section className="relative px-6 lg:px-8 py-24 sm:py-32">
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
+              {metadata?.name || 'Nikhil Dodda'}
             </h1>
-            
-            <p className="text-xl md:text-2xl text-blue-600 dark:text-blue-400 mb-8 font-medium">
-              {siteConfig?.tagline || "Applied AI Engineer"}
+            <p className="mt-6 text-lg leading-8 text-gray-300">
+              {metadata?.tagline || 'Applied AI Engineer'}
             </p>
-            
-            <p className="text-lg md:text-xl text-gray-700 dark:text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {siteConfig?.bio || "Building intelligent applications that solve real business problems with production LLM systems and scalable cloud infrastructure."}
+            <p className="mt-4 text-lg leading-8 text-gray-400 max-w-2xl mx-auto">
+              {metadata?.bio || 'Building intelligent applications that solve real business problems.'}
             </p>
+          </motion.div>
 
-            {/* Stats */}
-            {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-2xl mx-auto">
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">
-                    {stats.years_experience}+
-                  </div>
-                  <div className="text-gray-600 dark:text-white/70 text-sm">Years Experience</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">
-                    {stats.projects_completed}+
-                  </div>
-                  <div className="text-gray-600 dark:text-white/70 text-sm">Projects</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">
-                    {stats.technologies_mastered}+
-                  </div>
-                  <div className="text-gray-600 dark:text-white/70 text-sm">Technologies</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {stats.blog_posts_written}+
-                  </div>
-                  <div className="text-gray-600 dark:text-white/70 text-sm">Blog Posts</div>
-                </div>
-              </div>
-            )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-10 flex items-center justify-center gap-x-6"
+          >
+            <Button asChild size="lg">
+              <Link href="/projects">
+                View Projects
+              </Link>
+            </Button>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/projects"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-all transform hover:scale-105"
-              >
-                View My Work
-                <ArrowRight className="w-5 h-5" />
+            <Button variant="outline" size="lg" asChild>
+              <Link href={metadata?.resume_url || '/resume.pdf'}>
+                <Download className="mr-2 h-4 w-4" />
+                Resume
               </Link>
-              
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 dark:bg-white/10 dark:hover:bg-white/20 bg-gray-200/50 hover:bg-gray-300/50 text-gray-900 dark:text-white rounded-lg font-medium transition-all border border-gray-300/50 dark:border-white/20"
-              >
-                About Me
+            </Button>
+          </motion.div>
+
+          {/* Quick Contact */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="mt-8 flex items-center justify-center gap-x-4"
+          >
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={`mailto:${metadata?.email}`}>
+                <Mail className="mr-2 h-4 w-4" />
+                Contact
               </Link>
-              
-              {siteConfig?.calendar_url && (
-                <Link
-                  href={siteConfig.calendar_url}
-                  target="_blank"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 dark:bg-white/10 dark:hover:bg-white/20 bg-gray-200/50 hover:bg-gray-300/50 text-gray-900 dark:text-white rounded-lg font-medium transition-all border border-gray-300/50 dark:border-white/20"
-                >
-                  <Calendar className="w-5 h-5" />
-                  Let's Connect
-                </Link>
-              )}
-            </div>
-          </div>
+            </Button>
+            
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={metadata?.calendar_url || '#'}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Schedule Call
+              </Link>
+            </Button>
+            
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={metadata?.github_url || '#'}>
+                <Github className="mr-2 h-4 w-4" />
+                GitHub
+              </Link>
+            </Button>
+          </motion.div>
         </div>
       </section>
 
-      {/* Recent Blog Posts - Only if available */}
-      {recentPosts.length > 0 && (
-        <section className="py-20 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Latest Insights</h2>
-              <p className="text-xl text-gray-700 dark:text-white/80">Thoughts on AI, technology, and software engineering</p>
-            </div>
+      {/* Stats Section */}
+      {stats && (
+        <section className="py-16 px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="grid grid-cols-2 gap-8 md:grid-cols-4"
+            >
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{stats.total_projects}</div>
+                <div className="text-sm text-gray-400 mt-1">Projects</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{stats.years_experience}+</div>
+                <div className="text-sm text-gray-400 mt-1">Years Experience</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{stats.uptime_percentage}%</div>
+                <div className="text-sm text-gray-400 mt-1">Uptime</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{stats.performance_improvement}%</div>
+                <div className="text-sm text-gray-400 mt-1">Faster</div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* Featured Projects */}
+      <section className="py-16 px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            <h2 className="text-3xl font-bold text-white text-center mb-12">
+              Featured Projects
+            </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recentPosts.slice(0, 3).map((post) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className="group block"
+              {featuredProjects.slice(0, 3).map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
                 >
-                  <article className="bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/40 transition-all hover:transform hover:scale-105 h-full">
-                    {post.featured_image && (
-                      <div className="w-full h-48 mb-4 rounded-xl overflow-hidden">
-                        <img 
-                          src={post.featured_image} 
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  <Card className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-colors">
+                    {project.thumbnail && (
+                      <div className="relative h-48 w-full">
+                        <Image
+                          src={project.thumbnail}
+                          alt={project.title}
+                          fill
+                          className="object-cover rounded-t-lg"
                         />
                       </div>
                     )}
-                    
-                    <div className="flex items-center gap-4 text-gray-500 dark:text-white/60 text-sm mb-3">
-                      <span className="px-2 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full text-xs">
-                        {post.category}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{post.reading_time} min read</span>
+                    <CardHeader>
+                      <CardTitle className="text-white">{project.title}</CardTitle>
+                      <CardDescription className="text-gray-400">
+                        {project.tagline}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.technologies.slice(0, 3).map((tech) => (
+                          <Badge key={tech.id} variant="secondary">
+                            {tech.name}
+                          </Badge>
+                        ))}
                       </div>
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {post.title}
-                    </h3>
-                    
-                    <p className="text-gray-700 dark:text-white/80 line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="mt-4 text-blue-600 dark:text-blue-400 text-sm font-medium">
-                      Read more →
-                    </div>
-                  </article>
-                </Link>
+                      
+                      <div className="flex gap-2">
+                        {project.github_url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={project.github_url}>
+                              <Github className="mr-2 h-4 w-4" />
+                              Code
+                            </Link>
+                          </Button>
+                        )}
+                        
+                        {project.live_demo_url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={project.live_demo_url}>
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Demo
+                            </Link>
+                          </Button>
+                        )}
+                        
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/projects/${project.slug}`}>
+                            Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
             
             <div className="text-center mt-12">
-              <Link
-                href="/blog"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-white/10 hover:bg-white/90 dark:hover:bg-white/20 text-gray-900 dark:text-white rounded-lg transition-colors backdrop-blur-sm border border-gray-200 dark:border-white/20"
-              >
-                View All Posts
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <Button asChild variant="outline">
+                <Link href="/projects">View All Projects</Link>
+              </Button>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Recent Blog Posts */}
+      {recentPosts.length > 0 && (
+        <section className="py-16 px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.0 }}
+            >
+              <h2 className="text-3xl font-bold text-white text-center mb-12">
+                Recent Posts
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recentPosts.slice(0, 3).map((post, index) => (
+                  <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                  >
+                    <Card className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-colors">
+                      {post.featured_image && (
+                        <div className="relative h-48 w-full">
+                          <Image
+                            src={post.featured_image}
+                            alt={post.title}
+                            fill
+                            className="object-cover rounded-t-lg"
+                          />
+                        </div>
+                      )}
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline">{post.category}</Badge>
+                          <span className="text-sm text-gray-400">
+                            {post.reading_time} min read
+                          </span>
+                        </div>
+                        <CardTitle className="text-white line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="text-gray-400 line-clamp-3">
+                          {post.excerpt}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/blog/${post.slug}`}>
+                            Read More
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+              
+              <div className="text-center mt-12">
+                <Button asChild variant="outline">
+                  <Link href="/blog">View All Posts</Link>
+                </Button>
+              </div>
+            </motion.div>
           </div>
         </section>
       )}
+      
+      {/* CTA Section */}
+      <section className="py-16 px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
+          >
+            <h2 className="text-3xl font-bold text-white mb-6">
+              Let's Build Something Amazing Together
+            </h2>
+            <p className="text-lg text-gray-400 mb-8">
+              Ready to turn your AI ideas into production-ready applications?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button size="lg" asChild>
+                <Link href="/contact">Get In Touch</Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href={metadata?.calendar_url || '#'}>Schedule a Call</Link>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
-  );
+  )
 }

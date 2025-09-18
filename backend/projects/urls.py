@@ -1,17 +1,35 @@
+# backend/projects/urls.py
 from django.urls import path
-from . import views
+from .views import (
+    ProjectListView,
+    ProjectDetailView, 
+    TechnologyListView,
+    TechStackView,
+    portfolio_stats,
+    site_metadata,
+    career_highlights,
+    contact_submit,
+    api_health
+)
 
 urlpatterns = [
-    path('test/', views.api_test, name='api_test'),
-    path('projects/', views.projects_list, name='projects_list'),
-    path('projects/featured/', views.featured_projects, name='featured_projects'),
-    path('projects/<slug:slug>/', views.project_detail, name='project_detail'),
-    path('tech-stack/', views.tech_stack, name='tech_stack'),
-    path('highlights/', views.career_highlights, name='career_highlights'),
-    path('metadata/', views.site_metadata, name='site_metadata'),
-    path('stats/', views.site_stats, name='site_stats'),
-    path('contact/', views.contact_submit, name='contact_submit'),
+    # Health check
+    path('test/', api_health, name='api-health'),
     
-    # Legacy URLs for compatibility
-    path('technologies/', views.technologies_list, name='technologies_list'),
+    # Projects
+    path('projects/', ProjectListView.as_view(), name='project-list'),
+    path('projects/featured/', ProjectListView.as_view(), {'featured': 'true'}, name='featured-projects'),
+    path('projects/<slug:slug>/', ProjectDetailView.as_view(), name='project-detail'),
+    
+    # Technologies
+    path('technologies/', TechnologyListView.as_view(), name='technology-list'),
+    path('tech-stack/', TechStackView.as_view(), name='tech-stack'),
+    
+    # Site data
+    path('stats/', portfolio_stats, name='portfolio-stats'),
+    path('metadata/', site_metadata, name='site-metadata'),
+    path('highlights/', career_highlights, name='career-highlights'),
+    
+    # Contact
+    path('contact/', contact_submit, name='contact-submit'),
 ]

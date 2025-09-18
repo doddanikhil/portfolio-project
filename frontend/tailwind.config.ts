@@ -1,12 +1,22 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+// frontend/tailwind.config.ts
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
   darkMode: ["class"],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -48,45 +58,23 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      animation: {
-        "fade-in": "fadeIn 0.5s ease-in-out",
-        "slide-up": "slideUp 0.3s ease-out",
-        "bounce-gentle": "bounceGentle 2s infinite",
-        "glow": "glow 2s ease-in-out infinite alternate",
-      },
       keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        slideUp: {
-          "0%": { transform: "translateY(100%)" },
-          "100%": { transform: "translateY(0)" },
-        },
-        bounceGentle: {
-          "0%, 100%": { transform: "translateY(-5%)" },
-          "50%": { transform: "translateY(0)" },
-        },
-        glow: {
-          "0%": { boxShadow: "0 0 5px hsl(var(--primary))" },
-          "100%": { boxShadow: "0 0 20px hsl(var(--primary))" },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
-      typography: {
-        DEFAULT: {
-          css: {
-            maxWidth: 'none',
-            color: 'hsl(var(--foreground))',
-            a: {
-              color: 'hsl(var(--primary))',
-              '&:hover': {
-                color: 'hsl(var(--primary))',
-              },
-            },
-          },
-        },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
-}
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
+
+export default config

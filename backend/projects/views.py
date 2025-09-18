@@ -1,331 +1,213 @@
-# STEP 1: Update backend/projects/views.py to use core models
-# Replace the imports and use your existing core models
-
+# backend/projects/views.py
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.db.models import Q, Sum
-from .models import Project, Technology, TechCategory
-# Use core models instead of duplicating
-from portfolio_backend.core.models import CareerHighlight, SiteConfiguration, ContactSubmission
-from portfolio_backend.blog.models import BlogPost
-import resend
-import os
-
-# Configure Resend API key from settings/environment (no hardcoded default)
-resend.api_key = os.getenv("RESEND_API_KEY", "")
-if not resend.api_key:
-    # In production, prefer proper logging; keeping simple raise to avoid silent misconfig
-    raise RuntimeError("RESEND_API_KEY is not set. Configure it in your environment.")
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import Project, Technology, TechCategory, SiteConfiguration
+from portfolio_backend.core.models import CareerHighlight, ContactSubmission
+from .serializers import (
+    ProjectListSerializer, 
+    ProjectDetailViewSerializer,
+    TechnologySerializer,
+    TechCategorySerializer
+)
 
 
-@api_view(['GET'])
-def api_test(request):
-    return Response({
-        'message': 'Portfolio API is working!',
-        'version': '2.0',
-        'status': 'healthy',
-        'endpoints': [
-            '/api/v1/test/',
-            '/api/v1/projects/',
-            '/api/v1/projects/featured/',
-            '/api/v1/projects/<slug>/',
-            '/api/v1/tech-stack/',
-            '/api/v1/highlights/',
-            '/api/v1/metadata/',
-            '/api/v1/stats/',
-            '/api/v1/blog/posts/',
-            '/api/v1/blog/recent/',
-            '/api/v1/contact/',
-        ]
-    })
-
-@api_view(['GET'])
-def projects_list(request):
-    """Get all published projects"""
-    projects = Project.objects.filter(is_published=True)
-    data = []
+class ProjectListView(generics.ListAPIView):
+    """List all published projects with optional filtering"""
+    serializer_class = ProjectListSerializer
     
-    for project in projects:
-        technologies = []
-        for tech in project.technologies.all():
-            technologies.append({
-                'name': tech.name,
-                'category': tech.category.name,
-                'color': getattr(tech, 'color', '#3B82F6')  # Safe access
-            })
+    def get_queryset(self):
+        queryset = Project.objects.filter(is_published=True)
         
-        data.append({
-            'title': project.title,
-            'slug': project.slug,
-            'tagline': project.tagline,
-            'thumbnail': project.thumbnail.url if project.thumbnail else None,
-            'hero_image': getattr(project, 'hero_image', None),
-            'is_featured': project.is_featured,
-            'github_url': project.github_url,
-            'live_demo_url': project.live_demo_url,
-            'technologies': technologies,
-            'created_at': project.created_at.isoformat(),
-            'priority': getattr(project, 'priority', 0)
-        })
-    
-    return Response(data)
-
-@api_view(['GET'])
-def featured_projects(request):
-    """Get only featured projects"""
-    projects = Project.objects.filter(is_published=True, is_featured=True)[:3]
-    data = []
-    
-    for project in projects:
-        technologies = []
-        for tech in project.technologies.all():
-            technologies.append({
-                'name': tech.name,
-                'category': tech.category.name,
-                'color': getattr(tech, 'color', '#3B82F6')
-            })
+        # Filter by featured projects
+        featured = self.request.query_params.get('featured', None)
+        if featured == 'true':
+            queryset = queryset.filter(is_featured=True)
         
-        data.append({
-            'title': project.title,
-            'slug': project.slug,
-            'tagline': project.tagline,
-            'thumbnail': project.thumbnail.url if project.thumbnail else None,
-            'technologies': technologies,
-            'github_url': project.github_url,
-            'live_demo_url': project.live_demo_url,
-            'created_at': project.created_at.isoformat(),
-        })
+        # Filter by technology
+        tech = self.request.query_params.get('tech', None)
+        if tech:
+            queryset = queryset.filter(technologies__name__icontains=tech)
+        
+        return queryset.distinct()
+
+
+class ProjectDetailView(generics.RetrieveAPIView):
+    """Get detailed view of a single project"""
+    serializer_class = ProjectDetailViewSerializer
+    lookup_field = 'slug'
     
-    return Response(data)
+    def get_queryset(self):
+        return Project.objects.filter(is_published=True)
+
+
+class TechnologyListView(generics.ListAPIView):
+    """List all technologies"""
+    queryset = Technology.objects.all()
+    serializer_class = TechnologySerializer
+
+
+class TechStackView(generics.ListAPIView):
+    """Get technologies grouped by category"""
+    queryset = TechCategory.objects.all()
+    serializer_class = TechCategorySerializer
+
 
 @api_view(['GET'])
-def project_detail(request, slug):
-    """Get detailed project information"""
+def portfolio_stats(request):
+    """Portfolio statistics for homepage"""
     try:
-        project = Project.objects.get(slug=slug, is_published=True)
+        config = SiteConfiguration.objects.first()
         
-        technologies = []
-        for tech in project.technologies.all():
-            technologies.append({
-                'name': tech.name,
-                'category': tech.category.name,
-                'proficiency': tech.proficiency,
-                'icon_url': tech.icon_url,
-                'description': tech.description,
-                'color': getattr(tech, 'color', '#3B82F6')
-            })
+        # Calculate dynamic stats
+        total_projects = Project.objects.filter(is_published=True).count()
+        featured_projects = Project.objects.filter(is_published=True, is_featured=True).count()
+        technologies_count = Technology.objects.count()
         
-        # Get project details if available
-        details = None
-        if hasattr(project, 'details'):
-            details = {
-                'problem_statement': project.details.problem_statement,
-                'solution_approach': project.details.solution_approach,
-                'technology_justification': project.details.technology_justification,
-                'technical_architecture': project.details.technical_architecture.url if project.details.technical_architecture else None,
-                'key_features': project.details.key_features,
-                'performance_metrics': project.details.performance_metrics,
-                'challenges_solved': project.details.challenges_solved,
-                'demo_video_url': project.details.demo_video_url,
-                'lessons_learned': getattr(project.details, 'lessons_learned', ''),
-                'code_snippets': getattr(project.details, 'code_snippets', []),
-            }
-        
-        data = {
-            'title': project.title,
-            'slug': project.slug,
-            'tagline': project.tagline,
-            'thumbnail': project.thumbnail.url if project.thumbnail else None,
-            'hero_image': getattr(project, 'hero_image', None),
-            'technologies': technologies,
-            'github_url': project.github_url,
-            'live_demo_url': project.live_demo_url,
-            'is_featured': project.is_featured,
-            'created_at': project.created_at.isoformat(),
-            'updated_at': project.updated_at.isoformat(),
-            'details': details
+        stats = {
+            'total_projects': total_projects,
+            'featured_projects': featured_projects,
+            'technologies_mastered': technologies_count,
+            'years_experience': config.years_experience if config else 2,
+            'uptime_percentage': '99.9',  # Your reported uptime
+            'performance_improvement': '40'  # Your latency improvement
         }
         
-        return Response(data)
-        
-    except Project.DoesNotExist:
-        return Response({'error': 'Project not found'}, status=404)
-
-@api_view(['GET'])
-def tech_stack(request):
-    """Get technologies grouped by category"""
-    categories = TechCategory.objects.all()
-    data = []
-    
-    for category in categories:
-        technologies = []
-        for tech in category.technology_set.all():
-            technologies.append({
-                'name': tech.name,
-                'proficiency': tech.proficiency,
-                'description': tech.description,
-                'icon_url': tech.icon_url,
-                'color': getattr(tech, 'color', '#3B82F6')
-            })
-        
-        if technologies:
-            data.append({
-                'category': category.name,
-                'order': getattr(category, 'order', 0),
-                'technologies': technologies
-            })
-    
-    return Response(data)
-
-@api_view(['GET'])
-def career_highlights(request):
-    """Get career highlights from core app"""
-    highlights = CareerHighlight.objects.all().order_by('-order')
-    data = []
-    
-    for highlight in highlights:
-        data.append({
-            'title': highlight.title,
-            'organization': highlight.organization,
-            'date_range': highlight.date_range,
-            'description': highlight.description,
-            'metrics': highlight.metrics,
-            'order': getattr(highlight, 'order', 0),
-            'is_current': getattr(highlight, 'is_current', False)
+        return Response(stats)
+    except Exception as e:
+        return Response({
+            'total_projects': 0,
+            'featured_projects': 0,
+            'technologies_mastered': 0,
+            'years_experience': 2,
+            'uptime_percentage': '99.9',
+            'performance_improvement': '40'
         })
-    
-    return Response(data)
+
 
 @api_view(['GET'])
 def site_metadata(request):
-    """Get site configuration from core app"""
+    """Get site configuration and metadata"""
     try:
         config = SiteConfiguration.objects.first()
         if not config:
+            # Return default metadata if no config exists
             return Response({
                 'name': 'Nikhil Dodda',
                 'tagline': 'Applied AI Engineer',
                 'bio': 'Building intelligent applications that solve real business problems.',
-                'location': 'Ashburn, Virginia',
-                'email': 'hello@nikhildodda.dev',
+                'location': 'DMV Metor Area, USA',
+                'email': 'iamdevnd@gmail.com',
+                'github_url': 'github.com/iamdevnd',
                 'linkedin_url': '',
-                'github_url': '',
-                'resume_url': '',
+                'twitter_url': '',
                 'calendar_url': '',
-                'profile_image': None,
-                'hero_video': None,
-                'meta_description': 'Applied AI Engineer specializing in production LLM systems.',
-                'meta_keywords': 'AI Engineer, Machine Learning, LLM, RAG, Python, AWS',
+                'resume_url': '',
+                'meta_description': 'Applied AI Engineer specializing in LLM systems, RAG, and production ML applications.',
+                'meta_keywords': 'AI Engineer, Machine Learning, LLM, RAG, Python, AWS'
             })
         
         data = {
-            'name': getattr(config, 'site_name', 'Nikhil Dodda'),
+            'name': config.name,
             'tagline': config.tagline,
             'bio': config.bio,
-            'location': getattr(config, 'location', 'Ashburn, Virginia'),
+            'location': config.location,
             'email': config.email,
-            'linkedin_url': getattr(config, 'linkedin_url', ''),
+            'phone': config.phone,
             'github_url': config.github_url,
-            'resume_url': getattr(config, 'resume_url', ''),
-            'calendar_url': f"https://cal.com/{config.cal_com_username}" if getattr(config, 'cal_com_username', None) else '',
-            'profile_image': config.profile_image.url if config.profile_image else None,
-            'hero_video': None,
+            'linkedin_url': config.linkedin_url,
+            'twitter_url': config.twitter_url,
+            'calendar_url': config.calendar_url,
+            'resume_url': config.resume_url,
             'meta_description': config.meta_description,
             'meta_keywords': config.meta_keywords,
+            'years_experience': config.years_experience,
+            'projects_completed': config.projects_completed,
+            'technologies_mastered': config.technologies_mastered,
+            'coffee_consumed': config.coffee_consumed
         }
         
         return Response(data)
-        
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({'error': 'Failed to fetch metadata'}, status=500)
+
 
 @api_view(['GET'])
-def site_stats(request):
-    """Get site statistics"""
+def career_highlights(request):
+    """Get career highlights"""
     try:
-        total_projects = Project.objects.filter(is_published=True).count()
-        total_technologies = Technology.objects.count()
-        blog_posts = BlogPost.objects.filter(is_published=True).count()
-        total_views = BlogPost.objects.filter(is_published=True).aggregate(
-            total=Sum('views')
-        )['total'] or 0
+        highlights = CareerHighlight.objects.all()
+        data = []
         
-        data = {
-            'years_experience': 2,
-            'projects_completed': max(total_projects, 5),
-            'technologies_mastered': max(total_technologies, 20),
-            'blog_posts_written': blog_posts,
-            'total_blog_views': total_views,
-            'coffee_consumed': 1500,
-        }
+        for highlight in highlights:
+            data.append({
+                'id': highlight.id,
+                'title': highlight.title,
+                'organization': highlight.organization,
+                'date_range': highlight.date_range,
+                'description': highlight.description,
+                'metrics': highlight.metrics,
+                'is_current': highlight.is_current
+            })
         
         return Response(data)
-        
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response([])
+
 
 @api_view(['POST'])
 def contact_submit(request):
-    """Handle contact form submissions using core model"""
+    """Handle contact form submissions"""
     try:
-        name = request.data.get('name', '').strip()
-        email = request.data.get('email', '').strip()
-        subject = request.data.get('subject', '').strip()
-        message = request.data.get('message', '').strip()
+        data = request.data
         
-        # Validation
-        if not all([name, email, subject, message]):
-            return Response({'error': 'All fields are required'}, status=400)
+        # Validate required fields
+        required_fields = ['name', 'email', 'subject', 'message']
+        for field in required_fields:
+            if not data.get(field):
+                return Response(
+                    {'error': f'{field} is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        if '@' not in email:
-            return Response({'error': 'Invalid email address'}, status=400)
-        
-        # Save to database using core model
+        # Create contact submission
         contact = ContactSubmission.objects.create(
-            name=name,
-            email=email,
-            subject=subject,
-            message=message,
-            company=request.data.get('company', '')  # Optional field
+            name=data['name'],
+            email=data['email'],
+            company=data.get('company', ''),
+            subject=data['subject'],
+            message=data['message']
         )
         
-        # Send email notification
-        try:
-            html_content = f"""
-            <h2>New Contact Form Submission</h2>
-            <p><strong>From:</strong> {name} ({email})</p>
-            <p><strong>Subject:</strong> {subject}</p>
-            <p><strong>Message:</strong></p>
-            <p>{message.replace('\n', '<br>')}</p>
-            <hr>
-            <p>Submitted at: {contact.created_at}</p>
-            """
-            
-            params = {
-                "from": "onboarding@resend.dev",
-                "to": ["nikhildodda@example.com"],
-                "subject": f"Portfolio Contact: {subject}",
-                "html": html_content,
-            }
-            
-            resend.emails.send(params)
-            
-        except Exception as email_error:
-            print(f"Email sending failed: {email_error}")
+        # Send email notification (optional)
+        if settings.RESEND_API_KEY:
+            try:
+                send_mail(
+                    subject=f"Portfolio Contact: {contact.subject}",
+                    message=f"From: {contact.name} <{contact.email}>\nCompany: {contact.company}\n\nMessage:\n{contact.message}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                    fail_silently=True,
+                )
+            except Exception as email_error:
+                pass  # Don't fail the API call if email fails
         
-        return Response({
-            'message': 'Thank you for your message! I\'ll get back to you within 24 hours.',
-            'success': True
-        })
-        
+        return Response(
+            {'message': 'Contact form submitted successfully'}, 
+            status=status.HTTP_201_CREATED
+        )
+    
     except Exception as e:
-        print(f"Contact form error: {e}")
-        return Response({'error': 'Something went wrong. Please try again.'}, status=500)
+        return Response(
+            {'error': 'Failed to submit contact form'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-# Legacy function names for compatibility
-def technologies_list(request):
-    return tech_stack(request)
 
-def send_contact_email(request):
-    return contact_submit(request)
+@api_view(['GET'])
+def api_health(request):
+    """Health check endpoint"""
+    return Response({'status': 'healthy', 'message': 'Portfolio API is running'})
