@@ -96,36 +96,27 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"), 
+        "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT", "6543"),
+        "PORT": os.getenv("DB_PORT", "6543"),  # default to transaction pooler
         "OPTIONS": {
             "sslmode": "require",
             "options": "-c default_transaction_isolation=read_committed"
         },
-        "CONN_MAX_AGE": 0,
+        "CONN_MAX_AGE": 0,  # no persistent connections (good for pgbouncer)
     }
 }
 
-# AUTO-DETECT MIGRATION MODE AND SWITCH PORTS
-import sys
-IS_MIGRATION_COMMAND = any(arg in sys.argv for arg in ['migrate', 'makemigrations', 'sqlmigrate', 'showmigrations'])
-
+# Switch port automatically for migrations
+IS_MIGRATION_COMMAND = any(
+    arg in sys.argv for arg in ['migrate', 'makemigrations', 'sqlmigrate', 'showmigrations']
+)
 if IS_MIGRATION_COMMAND:
-    # Use Session Pooler (port 5432) for migrations
     print("📦 Using Session Pooler for database migrations...")
     DATABASES["default"]["PORT"] = "5432"
 else:
-    # Use Transaction Pooler (port 6543) for normal operations
     DATABASES["default"]["PORT"] = os.getenv("DB_PORT", "6543")
-
-# Enhanced connection options for production
-if not DEBUG:
-    DATABASES["default"]["OPTIONS"].update({
-        "connect_timeout": 10,
-        "application_name": "portfolio_backend",
-    })
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
